@@ -74,8 +74,8 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton href="/dashboard" asChild tooltip="Faculty">
-                  <Link href="/dashboard">
+                <SidebarMenuButton href="/teacher/dashboard" asChild tooltip="Faculty">
+                  <Link href="/teacher/dashboard">
                     <Users />
                     Faculty
                   </Link>

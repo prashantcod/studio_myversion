@@ -49,7 +49,7 @@ export function Header() {
                 <Link href="/dashboard">Admin</Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href="/dashboard">Teacher</Link>
+                <Link href="/teacher/dashboard">Teacher</Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href="/dashboard">Student</Link>
