@@ -114,7 +114,7 @@ export function AvailableRoomsCard() {
               <p className="mt-2 text-center text-sm font-medium">{room.name}</p>
               <div
                 className={cn(
-                  'absolute bottom-2 right-2 h-3 w-3 rounded-full',
+                  'absolute bottom-2 right-2 h-2 w-2 rounded-full',
                   room.isAvailable ? 'bg-green-500' : 'bg-red-500'
                 )}
               />
