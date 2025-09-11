@@ -60,22 +60,6 @@ export default function TeacherLayout({children}: {children: React.ReactNode}) {
             </SidebarMenuItem>
 
             <SidebarGroup>
-              <SidebarGroupLabel>My Profile</SidebarGroupLabel>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  href="/teacher/dashboard"
-                  asChild
-                  tooltip="Basic Info"
-                >
-                  <Link href="/teacher/dashboard">
-                    <User />
-                    Basic Info
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarGroup>
-
-            <SidebarGroup>
               <SidebarGroupLabel>Academics</SidebarGroupLabel>
               <SidebarMenuItem>
                 <SidebarMenuButton
