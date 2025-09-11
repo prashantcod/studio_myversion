@@ -10,11 +10,56 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { DoorOpen } from 'lucide-react';
+import { DoorOpen, Computer, Presentation } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
+
+const roomsData = [
+  // Classrooms
+  { id: 1, name: '327 A', type: 'Classroom' },
+  { id: 2, name: '327 B', type: 'Classroom' },
+  { id: 3, name: '401', type: 'Classroom' },
+  { id: 4, name: '402', type: 'Classroom' },
+  { id: 5, name: '403', type: 'Classroom' },
+  { id: 6, name: '511 A', type: 'Classroom' },
+  { id: 7, name: '511 B', type: 'Classroom' },
+  { id: 8, name: '512', type: 'Classroom' },
+  { id: 9, name: 'LH-1', type: 'Classroom' },
+  { id: 10, name: 'LH-2', type: 'Classroom' },
+  // Labs
+  { id: 11, name: 'CSE Lab 1', type: 'Labs' },
+  { id: 12, name: 'CSE Lab 2', type: 'Labs' },
+  { id: 13, name: 'ECE Lab 1', type: 'Labs' },
+  { id: 14, name: 'ECE Lab 2', type: 'Labs' },
+  { id: 15, name: 'ME Lab', type: 'Labs' },
+  { id: 16, name: 'Civil Lab', type: 'Labs' },
+  { id: 17, name: 'EEE Lab', type: 'Labs' },
+  { id: 18, name: 'Physics Lab', type: 'Labs' },
+  { id: 19, name: 'Chemistry Lab', type: 'Labs' },
+  { id: 20, name: 'IT Lab 3', type: 'Labs' },
+  // Seminar Hall
+  { id: 21, name: 'Main Seminar Hall', type: 'Seminar Hall' },
+];
+
+
+const RoomIcon = ({ type }: { type: string }) => {
+  switch (type) {
+    case 'Classroom':
+      return <DoorOpen className="size-5 text-muted-foreground" />;
+    case 'Labs':
+      return <Computer className="size-5 text-muted-foreground" />;
+    case 'Seminar Hall':
+      return <Presentation className="size-5 text-muted-foreground" />;
+    default:
+      return null;
+  }
+};
+
 
 export function AvailableRoomsCard() {
   const [filter, setFilter] = React.useState('All');
+  const filteredRooms = roomsData.filter(room => filter === 'All' || room.type === filter);
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -29,7 +74,7 @@ export function AvailableRoomsCard() {
           </CardContent>
         </Card>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>Available Rooms & Labs</DialogTitle>
           <DialogDescription>
@@ -62,10 +107,13 @@ export function AvailableRoomsCard() {
             Seminar Hall
           </Button>
         </div>
-        <div>
-          <p className="p-4 text-center text-muted-foreground">
-            Room details will be displayed here based on the selected filter.
-          </p>
+        <div className="grid h-80 grid-cols-2 gap-4 overflow-y-auto p-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+           {filteredRooms.map(room => (
+            <Card key={room.id} className="flex flex-col items-center justify-center p-4">
+               <RoomIcon type={room.type} />
+              <p className="mt-2 text-center text-sm font-medium">{room.name}</p>
+            </Card>
+          ))}
         </div>
       </DialogContent>
     </Dialog>
