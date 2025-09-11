@@ -27,6 +27,7 @@ import {
 } from '@/components/ui/table';
 import {Button} from '@/components/ui/button';
 import {Badge} from '@/components/ui/badge';
+import { AvailableRoomsCard } from '@/components/available-rooms-card';
 
 const chartData = [
   {name: 'CSE', conflicts: 12},
@@ -99,16 +100,7 @@ export default function DashboardPage() {
             <p className="text-xs text-muted-foreground">e.g., B.Ed 2024, FYUP Sem 1</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Available Rooms</CardTitle>
-            <DoorOpen className="size-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">35</div>
-            <p className="text-xs text-muted-foreground">2 labs, 33 classrooms</p>
-          </CardContent>
-        </Card>
+        <AvailableRoomsCard />
       </div>
       <div className="grid grid-cols-1 gap-4 md:gap-8 lg:grid-cols-2 xl:grid-cols-3">
         <Card className="xl:col-span-2">
