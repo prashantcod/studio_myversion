@@ -15,10 +15,11 @@ export function Logo({className, ...props}: SVGProps<SVGSVGElement>) {
       {...props}
     >
       <title>NEP Timetable AI Logo</title>
-      <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
-      <path d="M12 6v6l4 2" />
-      <path d="M4 12h8" />
-      <path d="M12 12l5 3" />
+      <path d="M8 2v4" />
+      <path d="M16 2v4" />
+      <rect width="18" height="18" x="3" y="4" rx="2" />
+      <path d="M3 10h18" />
+      <path d="m9 16 2 2 4-4" />
     </svg>
   );
 }
