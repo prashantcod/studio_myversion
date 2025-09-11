@@ -21,7 +21,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import {placeholderImages} from '@/lib/placeholder-images.json';
-import {BookOpen, Clock, Presentation, UserCheck} from 'lucide-react';
+import {BookOpen, Clock, UserCheck} from 'lucide-react';
 
 const assignedCourses = [
   {
