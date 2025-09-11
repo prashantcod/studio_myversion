@@ -16,8 +16,32 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { placeholderImages } from "@/lib/placeholder-images.json"
 
-export function UserNav() {
+type UserNavProps = {
+  userType?: 'admin' | 'teacher' | 'student';
+}
+
+export function UserNav({ userType = 'admin' }: UserNavProps) {
   const userAvatar = placeholderImages.find(img => img.id === 'user-avatar');
+
+  const users = {
+    admin: {
+      name: 'Admin',
+      email: 'admin@university.edu',
+      fallback: 'AD',
+    },
+    teacher: {
+      name: 'Dr. Jane Doe',
+      email: 'jane.doe@university.edu',
+      fallback: 'JD',
+    },
+    student: {
+      name: 'John Smith',
+      email: 'john.smith@university.edu',
+      fallback: 'JS'
+    }
+  }
+
+  const currentUser = users[userType];
 
   return (
     <DropdownMenu>
@@ -25,16 +49,16 @@ export function UserNav() {
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-9 w-9">
             {userAvatar && <AvatarImage src={userAvatar.imageUrl} alt="User avatar" data-ai-hint={userAvatar.imageHint} />}
-            <AvatarFallback>AD</AvatarFallback>
+            <AvatarFallback>{currentUser.fallback}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">Admin</p>
+            <p className="text-sm font-medium leading-none">{currentUser.name}</p>
             <p className="text-xs leading-none text-muted-foreground">
-              admin@university.edu
+              {currentUser.email}
             </p>
           </div>
         </DropdownMenuLabel>

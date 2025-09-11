@@ -8,6 +8,10 @@ import {
   Wand2,
   DoorOpen,
   ClipboardEdit,
+  User,
+  BookOpen,
+  Scale,
+  FileText,
 } from 'lucide-react';
 
 import {
@@ -27,7 +31,7 @@ import {Button} from '@/components/ui/button';
 import {UserNav} from '@/components/user-nav';
 import {Logo} from '@/components/logo';
 
-export default function AppLayout({children}: {children: React.ReactNode}) {
+export default function TeacherLayout({children}: {children: React.ReactNode}) {
   return (
     <SidebarProvider>
       <Sidebar>
@@ -40,15 +44,15 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
           </Button>
         </SidebarHeader>
         <SidebarContent>
-          <SidebarMenu>
+          <SidebarMenu className="TeacherSection">
             <SidebarMenuItem>
               <SidebarMenuButton
-                href="/dashboard"
+                href="/teacher/dashboard"
                 asChild
                 isActive
                 tooltip="Dashboard"
               >
-                <Link href="/dashboard">
+                <Link href="/teacher/dashboard">
                   <LayoutDashboard />
                   Dashboard
                 </Link>
@@ -56,56 +60,60 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
             </SidebarMenuItem>
 
             <SidebarGroup>
-              <SidebarGroupLabel>Data Management</SidebarGroupLabel>
+              <SidebarGroupLabel>My Profile</SidebarGroupLabel>
               <SidebarMenuItem>
-                <SidebarMenuButton href="/dashboard" asChild tooltip="Data Entry">
-                  <Link href="/dashboard">
-                    <ClipboardEdit />
-                    Data Entry
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton href="/dashboard" asChild tooltip="Courses">
-                  <Link href="/dashboard">
-                    <BookCopy />
-                    Courses
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton href="/teacher/dashboard" asChild tooltip="Faculty">
+                <SidebarMenuButton
+                  href="/teacher/dashboard"
+                  asChild
+                  tooltip="Basic Info"
+                >
                   <Link href="/teacher/dashboard">
-                    <Users />
-                    Faculty
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton href="/dashboard" asChild tooltip="Students">
-                  <Link href="/dashboard">
-                    <GraduationCap />
-                    Students
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton href="/dashboard" asChild tooltip="Rooms">
-                  <Link href="/dashboard">
-                    <DoorOpen />
-                    Rooms & Labs
+                    <User />
+                    Basic Info
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarGroup>
 
             <SidebarGroup>
-              <SidebarGroupLabel>Core</SidebarGroupLabel>
+              <SidebarGroupLabel>Academics</SidebarGroupLabel>
               <SidebarMenuItem>
-                <SidebarMenuButton href="/dashboard" asChild tooltip="Generate">
-                  <Link href="/dashboard">
-                    <Wand2 />
-                    Generate Timetable
+                <SidebarMenuButton
+                  href="/teacher/dashboard"
+                  asChild
+                  tooltip="My Courses"
+                >
+                  <Link href="/teacher/dashboard">
+                    <BookOpen />
+                    My Courses
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  href="/teacher/dashboard"
+                  asChild
+                  tooltip="Materials"
+                >
+                  <Link href="/teacher/dashboard">
+                    <FileText />
+                    Materials
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarGroup>
+
+            <SidebarGroup>
+              <SidebarGroupLabel>Guidelines</SidebarGroupLabel>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  href="/teacher/dashboard"
+                  asChild
+                  tooltip="NEP Rules"
+                >
+                  <Link href="/teacher/dashboard">
+                    <Scale />
+                    NEP Rules
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -117,7 +125,7 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
         <header className="flex h-14 items-center justify-between gap-4 border-b bg-background p-4 sm:px-6">
           <SidebarTrigger className="md:hidden" />
           <div className="flex flex-1 items-center justify-end">
-            <UserNav userType="admin" />
+            <UserNav userType="teacher" />
           </div>
         </header>
         <main className="flex-1 overflow-auto p-4 sm:px-6 sm:py-0">
