@@ -10,17 +10,19 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
-import { ClipboardEdit, FileUp, Files, PenSquare } from 'lucide-react';
+import { ClipboardEdit, FileUp, Files, PenSquare, UserPlus, GraduationCap } from 'lucide-react';
+import { StudentEntryDialog } from './student-entry-dialog';
+import { TeacherEntryDialog } from './teacher-entry-dialog';
 
 export function DataEntryDialog() {
   return (
     <Dialog>
       <DialogTrigger asChild>
         <SidebarMenuItem>
-            <SidebarMenuButton>
-                <ClipboardEdit />
-                Data Entry
-            </SidebarMenuButton>
+          <SidebarMenuButton>
+            <ClipboardEdit />
+            Data Entry
+          </SidebarMenuButton>
         </SidebarMenuItem>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
@@ -39,10 +41,26 @@ export function DataEntryDialog() {
             <Files className="mr-2" />
             Upload Multiple Files
           </Button>
-          <Button variant="outline" className="justify-start">
-            <PenSquare className="mr-2" />
-            Manual Entry
-          </Button>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="justify-start">
+                <PenSquare className="mr-2" />
+                Manual Entry
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Manual Entry</DialogTitle>
+                <DialogDescription>
+                  Select the type of data you want to enter manually.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex flex-col gap-4 py-4">
+                <StudentEntryDialog />
+                <TeacherEntryDialog />
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </DialogContent>
     </Dialog>
