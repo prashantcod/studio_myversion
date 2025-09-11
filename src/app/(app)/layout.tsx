@@ -26,6 +26,7 @@ import {
 import {Button} from '@/components/ui/button';
 import {UserNav} from '@/components/user-nav';
 import {Logo} from '@/components/logo';
+import { DataEntryDialog } from '@/components/data-entry-dialog';
 
 export default function AppLayout({children}: {children: React.ReactNode}) {
   return (
@@ -57,14 +58,7 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
 
             <SidebarGroup>
               <SidebarGroupLabel>Data Management</SidebarGroupLabel>
-              <SidebarMenuItem>
-                <SidebarMenuButton href="/dashboard" asChild tooltip="Data Entry">
-                  <Link href="/dashboard">
-                    <ClipboardEdit />
-                    Data Entry
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              <DataEntryDialog />
               <SidebarMenuItem>
                 <SidebarMenuButton href="/dashboard" asChild tooltip="Courses">
                   <Link href="/dashboard">
