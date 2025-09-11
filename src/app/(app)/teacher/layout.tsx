@@ -1,17 +1,10 @@
 import Link from 'next/link';
 import {
-  BookCopy,
-  GraduationCap,
-  LayoutDashboard,
-  Settings,
-  Users,
-  Wand2,
-  DoorOpen,
-  ClipboardEdit,
-  User,
   BookOpen,
-  Scale,
+  CalendarOff,
   FileText,
+  LayoutDashboard,
+  Scale,
 } from 'lucide-react';
 
 import {
@@ -30,6 +23,7 @@ import {
 import {Button} from '@/components/ui/button';
 import {UserNav} from '@/components/user-nav';
 import {Logo} from '@/components/logo';
+import {OnLeaveDialog} from '@/components/on-leave-dialog';
 
 export default function TeacherLayout({children}: {children: React.ReactNode}) {
   return (
@@ -85,6 +79,7 @@ export default function TeacherLayout({children}: {children: React.ReactNode}) {
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+              <OnLeaveDialog />
             </SidebarGroup>
 
             <SidebarGroup>
