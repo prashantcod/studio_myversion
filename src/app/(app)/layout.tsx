@@ -7,6 +7,7 @@ import {
   Users,
   Wand2,
   DoorOpen,
+  ClipboardEdit,
 } from 'lucide-react';
 
 import {
@@ -56,6 +57,14 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
 
             <SidebarGroup>
               <SidebarGroupLabel>Data Management</SidebarGroupLabel>
+              <SidebarMenuItem>
+                <SidebarMenuButton href="/dashboard" asChild tooltip="Data Entry">
+                  <Link href="/dashboard">
+                    <ClipboardEdit />
+                    Data Entry
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton href="/dashboard" asChild tooltip="Courses">
                   <Link href="/dashboard">
