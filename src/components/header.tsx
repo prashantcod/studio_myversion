@@ -1,6 +1,12 @@
 import Link from 'next/link';
 
 import {Button} from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {Logo} from '@/components/logo';
 
 export function Header() {
@@ -34,9 +40,22 @@ export function Header() {
           </Link>
         </nav>
         <div className="flex flex-1 items-center justify-end gap-4">
-          <Button asChild>
-            <Link href="/dashboard">Login</Link>
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button>Login</Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-40">
+              <DropdownMenuItem asChild>
+                <Link href="/dashboard">Admin</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/dashboard">Teacher</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/dashboard">Student</Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </header>
