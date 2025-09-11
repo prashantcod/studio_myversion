@@ -1,15 +1,17 @@
 import Link from 'next/link';
-import {GraduationCap} from 'lucide-react';
 
 import {Button} from '@/components/ui/button';
+import {Logo} from '@/components/logo';
 
 export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:px-6">
       <div className="container flex h-14 items-center">
         <Link href="/" className="mr-6 flex items-center">
-          <GraduationCap className="mr-2 size-6 text-primary" />
-          <span className="hidden font-bold sm:inline-block">NEP Timetable AI</span>
+          <Logo className="mr-2 text-primary" />
+          <span className="hidden font-bold sm:inline-block">
+            NEP Timetable AI
+          </span>
         </Link>
         <nav className="hidden flex-1 items-center gap-6 text-sm font-medium md:flex">
           <Link

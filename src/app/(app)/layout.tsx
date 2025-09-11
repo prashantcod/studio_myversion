@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/sidebar';
 import {Button} from '@/components/ui/button';
 import {UserNav} from '@/components/user-nav';
+import {Logo} from '@/components/logo';
 
 export default function AppLayout({children}: {children: React.ReactNode}) {
   return (
@@ -31,7 +32,7 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
       <Sidebar>
         <SidebarHeader>
           <Button variant="ghost" className="-ml-2 flex items-center gap-2">
-            <GraduationCap className="size-6 text-primary" />
+            <Logo className="text-primary" />
             <span className="font-headline text-lg font-semibold">
               NEP Timetable AI
             </span>
