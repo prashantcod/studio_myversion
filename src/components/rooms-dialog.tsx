@@ -11,10 +11,10 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { DoorOpen, Computer, Presentation, ChevronLeft, Clock, Calendar } from 'lucide-react';
+import { DoorOpen, Computer, Presentation, ChevronLeft, Clock, Calendar, User, Book } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { SidebarMenuButton, SidebarMenuItem } from './ui/sidebar';
-import { useDataStore } from '@/lib/data-store';
+import { useDataStore, ScheduleEntry } from '@/lib/data-store';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from './ui/badge';
 import { format, addDays, startOfWeek } from 'date-fns';
@@ -26,51 +26,41 @@ type Room = {
   id: number;
   name: string;
   type: 'Classroom' | 'Labs' | 'Seminar Hall';
-  schedule: {
-    [day: string]: {
-      [timeSlot: string]: boolean; // true if occupied, false if free
-    }
-  }
+  capacity: number;
 };
 
 // Function to generate a somewhat random schedule for a room
 const generateInitialSchedule = () => {
-    const schedule: Room['schedule'] = {};
-    DAYS.forEach(day => {
-        schedule[day] = {};
-        TIME_SLOTS.forEach(slot => {
-            schedule[day][slot] = Math.random() > 0.7; // ~30% chance of being occupied
-        });
-    });
+    const schedule: (ScheduleEntry | null)[][] = [];
     return schedule;
 };
 
 
 const initialRoomsData: Room[] = [
   // Classrooms
-  { id: 1, name: '327 A', type: 'Classroom', schedule: generateInitialSchedule() },
-  { id: 2, name: '327 B', type: 'Classroom', schedule: generateInitialSchedule() },
-  { id: 3, name: '401', type: 'Classroom', schedule: generateInitialSchedule() },
-  { id: 4, name: '402', type: 'Classroom', schedule: generateInitialSchedule() },
-  { id: 5, name: '403', type: 'Classroom', schedule: generateInitialSchedule() },
-  { id: 6, name: '511 A', type: 'Classroom', schedule: generateInitialSchedule() },
-  { id: 7, name: '511 B', type: 'Classroom', schedule: generateInitialSchedule() },
-  { id: 8, name: '512', type: 'Classroom', schedule: generateInitialSchedule() },
-  { id: 9, name: 'LH-1', type: 'Classroom', schedule: generateInitialSchedule() },
-  { id: 10, name: 'LH-2', type: 'Classroom', schedule: generateInitialSchedule() },
+  { id: 1, name: '327 A', type: 'Classroom', capacity: 70 },
+  { id: 2, name: '327 B', type: 'Classroom', capacity: 70 },
+  { id: 3, name: '401', type: 'Classroom', capacity: 70 },
+  { id: 4, name: '402', type: 'Classroom', capacity: 70 },
+  { id: 5, name: '403', type: 'Classroom', capacity: 70 },
+  { id: 6, name: '511 A', type: 'Classroom', capacity: 70 },
+  { id: 7, name: '511 B', type: 'Classroom', capacity: 70 },
+  { id: 8, name: '512', type: 'Classroom', capacity: 70 },
+  { id: 9, name: 'LH-1', type: 'Classroom', capacity: 150 },
+  { id: 10, name: 'LH-2', type: 'Classroom', capacity: 150 },
   // Labs
-  { id: 11, name: 'CSE Lab 1', type: 'Labs', schedule: generateInitialSchedule() },
-  { id: 12, name: 'CSE Lab 2', type: 'Labs', schedule: generateInitialSchedule() },
-  { id: 13, name: 'ECE Lab 1', type: 'Labs', schedule: generateInitialSchedule() },
-  { id: 14, name: 'ECE Lab 2', type: 'Labs', schedule: generateInitialSchedule() },
-  { id: 15, name: 'ME Lab', type: 'Labs', schedule: generateInitialSchedule() },
-  { id: 16, name: 'Civil Lab', type: 'Labs', schedule: generateInitialSchedule() },
-  { id: 17, name: 'EEE Lab', type: 'Labs', schedule: generateInitialSchedule() },
-  { id: 18, name: 'Physics Lab', type: 'Labs', schedule: generateInitialSchedule() },
-  { id: 19, name: 'Chemistry Lab', type: 'Labs', schedule: generateInitialSchedule() },
-  { id: 20, name: 'IT Lab 3', type: 'Labs', schedule: generateInitialSchedule() },
+  { id: 11, name: 'CSE Lab 1', type: 'Labs', capacity: 60 },
+  { id: 12, name: 'CSE Lab 2', type: 'Labs', capacity: 60 },
+  { id: 13, name: 'ECE Lab 1', type: 'Labs', capacity: 60 },
+  { id: 14, name: 'ECE Lab 2', type: 'Labs', capacity: 60 },
+  { id: 15, name: 'ME Lab', type: 'Labs', capacity: 60 },
+  { id: 16, name: 'Civil Lab', type: 'Labs', capacity: 60 },
+  { id: 17, name: 'EEE Lab', type: 'Labs', capacity: 60 },
+  { id: 18, name: 'Physics Lab', type: 'Labs', capacity: 60 },
+  { id: 19, name: 'Chemistry Lab', type: 'Labs', capacity: 60 },
+  { id: 20, name: 'IT Lab 3', type: 'Labs', capacity: 60 },
   // Seminar Hall
-  { id: 21, name: 'Main Seminar Hall', type: 'Seminar Hall', schedule: generateInitialSchedule() },
+  { id: 21, name: 'Main Seminar Hall', type: 'Seminar Hall', capacity: 200 },
 ];
 
 
@@ -83,9 +73,15 @@ const RoomIcon = ({ type }: { type: string }) => {
   }
 };
 
-const RoomDetailView = ({ room, onBack, onOccupy }: { room: Room, onBack: () => void, onOccupy: (day: string, timeSlot: string) => void }) => {
+const RoomDetailView = ({ room, onBack, onOccupy, schedule }: { room: Room, onBack: () => void, onOccupy: (day: string, timeSlot: string) => void, schedule: ScheduleEntry[] }) => {
     const today = new Date();
     const startOfTheWeek = startOfWeek(today, { weekStartsOn: 1 }); // Monday
+
+    const roomSchedule = schedule.filter(entry => entry.roomId === room.name);
+    
+    const getBookingForSlot = (day: string, timeSlot: string) => {
+        return roomSchedule.find(entry => entry.day === day && entry.timeSlot === timeSlot);
+    }
 
     return (
         <div>
@@ -103,17 +99,31 @@ const RoomDetailView = ({ room, onBack, onOccupy }: { room: Room, onBack: () => 
                             <p className="text-xs text-muted-foreground mb-2">{format(addDays(startOfTheWeek, dayIndex), 'do MMMM')}</p>
                             <div className="space-y-2">
                                 {TIME_SLOTS.map(slot => {
-                                    const isOccupied = room.schedule[day][slot];
+                                    const booking = getBookingForSlot(day, slot);
                                     return (
-                                        <div key={slot} className={cn("flex items-center justify-between p-2 rounded-md", isOccupied ? "bg-muted" : "bg-green-500/10")}>
-                                            <div className="flex items-center gap-2">
-                                                <Clock className="size-4 text-muted-foreground" />
-                                                <span className="text-sm font-medium">{slot}</span>
+                                        <div key={slot} className={cn("p-2 rounded-md", booking ? "bg-muted" : "bg-green-500/10")}>
+                                             <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-2">
+                                                    <Clock className="size-4 text-muted-foreground" />
+                                                    <span className="text-sm font-medium">{slot}</span>
+                                                </div>
+                                                {!booking && (
+                                                    <Button size="sm" variant="secondary" onClick={() => onOccupy(day, slot)}>
+                                                        Occupy
+                                                    </Button>
+                                                )}
                                             </div>
-                                            {!isOccupied && (
-                                                <Button size="sm" variant="secondary" onClick={() => onOccupy(day, slot)}>
-                                                    Occupy
-                                                </Button>
+                                            {booking && (
+                                                <div className='mt-2 text-xs pl-2 border-l-2 ml-2 space-y-1'>
+                                                     <div className="flex items-center gap-2">
+                                                        <User className="size-3 text-muted-foreground" />
+                                                        <span>{booking.facultyName}</span>
+                                                    </div>
+                                                     <div className="flex items-center gap-2">
+                                                        <Book className="size-3 text-muted-foreground" />
+                                                        <span>{booking.courseName}</span>
+                                                    </div>
+                                                </div>
                                             )}
                                         </div>
                                     )
@@ -129,25 +139,14 @@ const RoomDetailView = ({ room, onBack, onOccupy }: { room: Room, onBack: () => 
 
 export function RoomsDialog({ children }: { children?: React.ReactNode }) {
   const [filter, setFilter] = React.useState('All');
-  const [roomsData, setRoomsData] = React.useState(initialRoomsData);
   const [selectedRoom, setSelectedRoom] = React.useState<Room | null>(null);
-  const { bookRoom } = useDataStore();
+  const { bookRoom, timetable } = useDataStore();
   const { toast } = useToast();
 
   const handleOccupy = (day: string, timeSlot: string) => {
     if (!selectedRoom) return;
 
-    // Update the local state to show the change immediately
-    setRoomsData(prevRooms => 
-      prevRooms.map(r => 
-        r.id === selectedRoom.id 
-          ? { ...r, schedule: { ...r.schedule, [day]: { ...r.schedule[day], [timeSlot]: true } } }
-          : r
-      )
-    );
-
-    // Call the data store to make the change persistent for the session
-    bookRoom({
+    const booking: ScheduleEntry = {
         roomId: selectedRoom.name,
         day,
         timeSlot,
@@ -155,21 +154,26 @@ export function RoomsDialog({ children }: { children?: React.ReactNode }) {
         courseCode: 'EXT-101', // Placeholder for extra class
         courseName: 'Extra Class',
         studentGroup: 'Ad-hoc'
-    });
+    }
+    
+    bookRoom(booking);
     
     toast({
         title: "Room Occupied",
         description: `${selectedRoom.name} has been booked for ${day} at ${timeSlot}.`
     });
+
+    // We don't need to manually update state as the data store change will trigger a re-render
   };
 
   const isRoomAvailableNow = (room: Room) => {
       // Simplified: checks if there's any free slot today.
       const today = DAYS[new Date().getDay() -1] || DAYS[0];
-      return Object.values(room.schedule[today]).some(isOccupied => !isOccupied);
+      const occupiedSlots = timetable.filter(entry => entry.roomId === room.name && entry.day === today).map(e => e.timeSlot);
+      return TIME_SLOTS.some(slot => !occupiedSlots.includes(slot));
   }
 
-  const filteredRooms = roomsData.filter(room => filter === 'All' || room.type === filter);
+  const filteredRooms = initialRoomsData.filter(room => filter === 'All' || room.type === filter);
 
   const onOpenChange = (open: boolean) => {
       if(!open) {
@@ -222,11 +226,9 @@ export function RoomsDialog({ children }: { children?: React.ReactNode }) {
             </div>
             </>
         ) : (
-            <RoomDetailView room={selectedRoom} onBack={() => setSelectedRoom(null)} onOccupy={handleOccupy} />
+            <RoomDetailView room={selectedRoom} onBack={() => setSelectedRoom(null)} onOccupy={handleOccupy} schedule={timetable} />
         )}
       </DialogContent>
     </Dialog>
   );
 }
-
-    
