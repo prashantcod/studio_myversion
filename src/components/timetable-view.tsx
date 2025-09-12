@@ -7,14 +7,16 @@ import { Badge } from './ui/badge';
 import { ScrollArea } from './ui/scroll-area';
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-const TIME_SLOTS_NEW = ['1:00 - 2:30 PM', '2:30 - 4:00 PM', '4:00 - 5:30 PM'];
 
-// Map your original time slots to the new format
-const mapTimeToNewSlot = (time: string): string => {
-    const hour = parseInt(time.split(':')[0]);
-    if (hour >= 9 && hour < 13) return TIME_SLOTS_NEW[0];
-    if (hour >= 13 && hour < 16) return TIME_SLOTS_NEW[1];
-    return TIME_SLOTS_NEW[2];
+// Helper to get all unique time slots from the schedule and sort them
+const getSortedTimeSlots = (schedule: ScheduleEntry[]): string[] => {
+  const timeSlots = new Set<string>();
+  schedule.forEach(entry => timeSlots.add(entry.timeSlot));
+  return Array.from(timeSlots).sort((a, b) => {
+    const aHour = parseInt(a.split(':')[0]);
+    const bHour = parseInt(b.split(':')[0]);
+    return aHour - bHour;
+  });
 };
 
 
@@ -24,8 +26,8 @@ type FormattedSchedule = {
     };
 };
 
-const formatScheduleForGrid = (schedule: ScheduleEntry[]): FormattedSchedule => {
-    const grid: FormattedSchedule = TIME_SLOTS_NEW.reduce((acc, slot) => {
+const formatScheduleForGrid = (schedule: ScheduleEntry[], timeSlots: string[]): FormattedSchedule => {
+    const grid: FormattedSchedule = timeSlots.reduce((acc, slot) => {
         acc[slot] = DAYS.reduce((dayAcc, day) => {
             dayAcc[day] = [];
             return dayAcc;
@@ -34,9 +36,8 @@ const formatScheduleForGrid = (schedule: ScheduleEntry[]): FormattedSchedule => 
     }, {} as FormattedSchedule);
 
     schedule.forEach(entry => {
-        const newSlot = mapTimeToNewSlot(entry.timeSlot);
-        if (grid[newSlot] && grid[newSlot][entry.day]) {
-            grid[newSlot][entry.day].push(entry);
+        if (grid[entry.timeSlot] && grid[entry.timeSlot][entry.day]) {
+            grid[entry.timeSlot][entry.day].push(entry);
         }
     });
 
@@ -67,7 +68,8 @@ const ClassCard = ({ entry }: { entry: ScheduleEntry }) => {
 
 
 export function TimetableView({ schedule }: { schedule: ScheduleEntry[] }) {
-    const gridData = formatScheduleForGrid(schedule);
+    const timeSlots = getSortedTimeSlots(schedule);
+    const gridData = formatScheduleForGrid(schedule, timeSlots);
 
     return (
         <div className="w-full overflow-x-auto rounded-lg border">
@@ -79,7 +81,7 @@ export function TimetableView({ schedule }: { schedule: ScheduleEntry[] }) {
                 ))}
 
                 {/* Body */}
-                {TIME_SLOTS_NEW.map(timeSlot => (
+                {timeSlots.map(timeSlot => (
                     <React.Fragment key={timeSlot}>
                         <div className="sticky left-0 z-10 border-r bg-card p-2 text-center text-sm font-medium">
                             {timeSlot}
