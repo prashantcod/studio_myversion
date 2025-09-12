@@ -3,7 +3,7 @@ import { courses as initialCourses } from './data/courses.json';
 import { rooms as initialRooms } from './data/rooms.json';
 import { faculty as initialFaculty, Faculty } from './data/faculty.json';
 import { studentGroups as initialStudentGroups, StudentGroup } from './data/students.json';
-
+import { ScheduleEntry } from './timetable-generator';
 
 export type Course = (typeof initialCourses)[0];
 export type Room = (typeof initialRooms)[0];
@@ -20,7 +20,7 @@ export type LeaveRequest = {
 
 export type Notification = {
     id: string;
-    type: 'leaveRequest' | 'timetableGenerated' | 'conflictResolved';
+    type: 'leaveRequest' | 'timetableGenerated' | 'conflictResolved' | 'roomBooked';
     title: string;
     description: string;
     isRead: boolean;
@@ -35,11 +35,14 @@ type DataStore = {
     studentGroups: StudentGroup[];
     leaveRequests: LeaveRequest[];
     notifications: Notification[];
+    timetable: ScheduleEntry[];
     addFaculty: (faculty: Omit<Faculty, 'id'>) => void;
     addStudentGroup: (group: Omit<StudentGroup, 'id'>) => void;
     addLeaveRequest: (request: Omit<LeaveRequest, 'id' | 'status'>) => void;
     updateLeaveRequestStatus: (id: string, status: LeaveRequest['status']) => void;
     markNotificationAsRead: (id: string) => void;
+    bookRoom: (booking: Omit<ScheduleEntry, 'isOnLeave'>) => void;
+    setTimetable: (newTimetable: ScheduleEntry[]) => void;
 };
 
 // In-memory data store
@@ -48,6 +51,7 @@ let dataStore: DataStore = {
     rooms: initialRooms,
     faculty: [...initialFaculty],
     studentGroups: [...initialStudentGroups],
+    timetable: [],
     leaveRequests: [
         {
             id: 'LR-DEMO-001',
@@ -143,14 +147,13 @@ let dataStore: DataStore = {
     addLeaveRequest: (request) => {
         const newRequest: LeaveRequest = {
             ...request,
-            id: `LR${Date.now()}`,
+            id: `LR-${crypto.randomUUID()}`,
             status: 'pending'
         };
         dataStore.leaveRequests.push(newRequest);
         
-        // Also create a notification
         const newNotification: Notification = {
-            id: `NOTIF-${Date.now()}`,
+            id: `NOTIF-${crypto.randomUUID()}`,
             type: 'leaveRequest',
             title: 'New Leave Request',
             description: `${newRequest.facultyName} has requested leave.`,
@@ -177,6 +180,25 @@ let dataStore: DataStore = {
         if (notification) {
             notification.isRead = true;
         }
+    },
+    bookRoom: (booking) => {
+        // Add to main timetable
+        dataStore.timetable.push(booking);
+
+        // Create notification
+        const newNotification: Notification = {
+            id: `NOTIF-${crypto.randomUUID()}`,
+            type: 'roomBooked',
+            title: 'Room Booked',
+            description: `${booking.facultyName} booked ${booking.roomId} for ${booking.courseName}.`,
+            isRead: false,
+            timestamp: new Date(),
+            payload: { ...booking }
+        };
+        dataStore.notifications.unshift(newNotification);
+    },
+    setTimetable: (newTimetable) => {
+        dataStore.timetable = newTimetable;
     }
 };
 

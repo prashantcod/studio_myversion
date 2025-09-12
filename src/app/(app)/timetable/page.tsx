@@ -3,25 +3,30 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { TimetableView } from "@/components/timetable-view";
-import { generateTimetable, ScheduleEntry } from "@/lib/timetable-generator";
+import { generateTimetable } from "@/lib/timetable-generator";
 import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useDataStore } from "@/lib/data-store";
 
 export default function TimetablePage() {
-    const [schedule, setSchedule] = useState<ScheduleEntry[]>([]);
+    const { timetable, setTimetable } = useDataStore();
     const [isLoading, setIsLoading] = useState(true);
 
     const fetchTimetable = async () => {
         setIsLoading(true);
         const result = await generateTimetable();
-        setSchedule(result.timetable);
+        setTimetable(result.timetable);
         setIsLoading(false);
     }
 
     useEffect(() => {
-        fetchTimetable();
-    }, []);
+        if (timetable.length === 0) {
+            fetchTimetable();
+        } else {
+            setIsLoading(false);
+        }
+    }, [timetable]);
 
 
     return (
@@ -47,7 +52,7 @@ export default function TimetablePage() {
                             </p>
                         </div>
                     ) : (
-                        <TimetableView schedule={schedule} />
+                        <TimetableView schedule={timetable} />
                     )}
                 </CardContent>
             </Card>

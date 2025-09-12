@@ -1,6 +1,6 @@
 
 'use client';
-import * as React from 'react';
+import *https://www.php8.ltd:/HostLocMJJ/https://github.com/../react';
 import {
   Dialog,
   DialogContent,
@@ -15,7 +15,7 @@ import {
   SidebarMenuItem,
   SidebarMenuBadge,
 } from '@/components/ui/sidebar';
-import { Bell, User, Calendar, MessageSquare, Check, X, ChevronLeft, Wand2, CheckCircle, Loader2 } from 'lucide-react';
+import { Bell, User, Calendar, MessageSquare, Check, X, ChevronLeft, Wand2, CheckCircle, Loader2, Home } from 'lucide-react';
 import { Button } from './ui/button';
 import { useDataStore, LeaveRequest, Notification, ScheduleEntry } from '@/lib/data-store';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
@@ -42,19 +42,21 @@ const LeaveRequestDetail = ({
 }) => {
     const [affectedClasses, setAffectedClasses] = React.useState<ScheduleEntry[]>([]);
     const [isGenerating, setIsGenerating] = React.useState(false);
+    const { timetable, setTimetable } = useDataStore();
     const router = useRouter();
     const { toast } = useToast();
 
     React.useEffect(() => {
-        const getAffectedClasses = async () => {
-            const { timetable } = await generateTimetable();
+        const getAffectedClasses = () => {
             const filtered = timetable.filter(
                 entry => entry.facultyName === request.facultyName
             );
             setAffectedClasses(filtered);
         };
-        getAffectedClasses();
-    }, [request.facultyName]);
+        if (timetable.length > 0) {
+          getAffectedClasses();
+        }
+    }, [request.facultyName, timetable]);
 
     const classesByCourse = affectedClasses.reduce((acc, entry) => {
         const key = `${entry.courseCode} (${entry.studentGroup})`;
@@ -73,7 +75,8 @@ const LeaveRequestDetail = ({
     const handleRegenerate = async () => {
         setIsGenerating(true);
         try {
-            await generateTimetable();
+            const result = await generateTimetable();
+            setTimetable(result.timetable);
             toast({
                 title: "Timetable Updated",
                 description: "The master timetable has been regenerated to reflect the approved leave.",
@@ -181,10 +184,11 @@ const LeaveRequestDetail = ({
   );
 };
 
-const NOTIFICATION_ICONS = {
+const NOTIFICATION_ICONS: Record<Notification['type'], React.ReactNode> = {
     leaveRequest: <Calendar className="size-5 text-blue-500" />,
     timetableGenerated: <Wand2 className="size-5 text-purple-500" />,
     conflictResolved: <CheckCircle className="size-5 text-green-500" />,
+    roomBooked: <Home className="size-5 text-orange-500" />,
 };
 
 
@@ -203,7 +207,10 @@ export function NotificationsDialog() {
     });
     // Refresh the selected request to show the change in status
     const notif = notifications.find(n => n.payload.leaveRequestId === leaveRequestId);
-    if(notif) setSelectedNotification(notif);
+    if(notif) {
+      const updatedNotif = {...notif, payload: {...notif.payload, status: 'approved' }};
+      setSelectedNotification(updatedNotif);
+    }
   }
 
   const handleReject = (leaveRequestId: string) => {
@@ -219,6 +226,11 @@ export function NotificationsDialog() {
   const handleNotificationClick = (notification: Notification) => {
     if (notification.type === 'leaveRequest') {
         setSelectedNotification(notification);
+    } else {
+        toast({
+            title: notification.title,
+            description: notification.description,
+        });
     }
     if (!notification.isRead) {
         markNotificationAsRead(notification.id);
@@ -263,12 +275,12 @@ export function NotificationsDialog() {
               </DialogDescription>
             </DialogHeader>
             <div className="py-4 space-y-2 max-h-96 overflow-y-auto">
-              {notifications.length > 0 ? notifications.map(notification => (
+              {notifications.length > 0 ? notifications.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()).map(notification => (
                 <div
                   key={notification.id}
                   className={cn(
                       "flex items-start gap-4 p-4 rounded-lg border cursor-pointer hover:bg-muted/50 transition-colors",
-                      !notification.isRead && "bg-blue-500/5"
+                      !notification.isRead && "bg-primary/5"
                   )}
                   onClick={() => handleNotificationClick(notification)}
                 >
@@ -282,7 +294,7 @@ export function NotificationsDialog() {
                         {formatDistanceToNow(notification.timestamp, { addSuffix: true })}
                     </p>
                   </div>
-                  {!notification.isRead && <div className="size-2 rounded-full bg-blue-500 mt-1.5" />}
+                  {!notification.isRead && <div className="size-2 rounded-full bg-primary mt-1.5" />}
                 </div>
               )) : (
                  <div className="text-center text-muted-foreground py-12">
@@ -304,7 +316,6 @@ export function NotificationsDialog() {
                     onReject={handleReject}
                 />
             ) : (
-                // Fallback for non-leave notifications or if data is missing
                 <div className="text-center py-12">
                     <p>This notification has no detailed view.</p>
                     <Button onClick={() => setSelectedNotification(null)} className="mt-4">Back to notifications</Button>
