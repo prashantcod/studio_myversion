@@ -1,11 +1,8 @@
 
-'use server';
-
 import { courses } from './data/courses.json';
 import { faculty as initialFaculty } from './data/faculty.json';
 import { rooms } from './data/rooms.json';
 import { studentGroups as initialStudentGroups } from './data/students.json';
-import { revalidatePath } from 'next/cache';
 
 // This is a simplified in-memory "database" for demonstration purposes.
 // In a real application, you would use a proper database like Firestore or PostgreSQL.
@@ -20,8 +17,8 @@ interface DataStore {
     getRooms: () => typeof rooms;
     getFaculty: () => Faculty[];
     getStudentGroups: () => StudentGroup[];
-    addFaculty: (facultyMember: Partial<Faculty>) => void;
-    addStudentGroup: (studentGroup: Partial<StudentGroup>) => void;
+    addFaculty: (facultyMember: Partial<Omit<Faculty, 'id'>>) => void;
+    addStudentGroup: (studentGroup: Partial<Omit<StudentGroup, 'id'>>) => void;
 }
 
 const dataStore: DataStore = {
@@ -40,7 +37,6 @@ const dataStore: DataStore = {
             availability: facultyMember.availability || { Monday: [], Tuesday: [], Wednesday: [], Thursday: [], Friday: [] },
         };
         dataStore.faculty.push(newFaculty);
-        revalidatePath('/(app)/dashboard'); // Revalidate to update UI
     },
     addStudentGroup: (studentGroup) => {
         const newId = `SG_${(dataStore.studentGroups.length + 1).toString()}`;
@@ -51,7 +47,6 @@ const dataStore: DataStore = {
             courses: studentGroup.courses || [],
         };
         dataStore.studentGroups.push(newStudentGroup);
-        revalidatePath('/(app)/dashboard'); // Revalidate to update UI
     }
 };
 

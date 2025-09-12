@@ -2,12 +2,14 @@
 'use server';
 
 import { useDataStore } from '@/lib/data-store';
+import { revalidatePath } from 'next/cache';
 
 function parseCSV(csvContent: string): Record<string, string>[] {
     const lines = csvContent.trim().split('\n');
     const header = lines[0].split(',').map(h => h.trim());
     const rows = lines.slice(1).map(line => {
-        const values = line.split(',').map(v => v.trim());
+        // This is a simple parser, for a real app, use a robust library
+        const values = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(v => v.trim().replace(/^"|"$/g, ''));
         const rowObject: Record<string, string> = {};
         header.forEach((key, index) => {
             rowObject[key] = values[index];
@@ -32,20 +34,23 @@ export async function uploadDataAction(fileContent: string): Promise<{ success: 
                 dataStore.addFaculty({
                     name: item.name,
                     // These fields would need more robust parsing in a real app
-                    expertise: item.expertise ? item.expertise.split(';') : [],
-                    availability: item.availability ? JSON.parse(item.availability) : {},
+                    expertise: item.expertise ? item.expertise.split(';').map(e => e.trim()) : [],
+                    availability: item.availability ? JSON.parse(item.availability) : { Monday: [], Tuesday: [], Wednesday: [], Thursday: [], Friday: [] },
                 });
                 teachersAdded++;
             } else if (item.size || item.courses) { // Likely a student group
                  dataStore.addStudentGroup({
                     name: item.name,
-                    size: parseInt(item.size, 10),
-                    courses: item.courses ? item.courses.split(';') : [],
+                    size: item.size ? parseInt(item.size, 10) : 0,
+                    courses: item.courses ? item.courses.split(';').map(c => c.trim()) : [],
                 });
                 studentsAdded++;
             }
         }
         
+        // Revalidate the path to reflect the changes in the UI.
+        revalidatePath('/(app)/dashboard', 'layout');
+
         return { success: true, message: `Successfully added ${teachersAdded} teachers and ${studentsAdded} student groups.` };
 
     } catch (error) {
