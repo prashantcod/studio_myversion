@@ -31,6 +31,7 @@ import {Badge} from '@/components/ui/badge';
 import { AvailableRoomsCard } from '@/components/available-rooms-card';
 import { CoursesDialogCard } from '@/components/courses-dialog-card';
 import { FacultyDialogCard } from '@/components/faculty-dialog-card';
+import { EnrolledStudentsCard } from '@/components/enrolled-students-card';
 
 const chartData = [
   {name: 'CSE', conflicts: 12},
@@ -75,16 +76,7 @@ export default function DashboardPage() {
       <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
         <CoursesDialogCard />
         <FacultyDialogCard />
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Student Groups</CardTitle>
-            <GraduationCap className="size-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">8</div>
-            <p className="text-xs text-muted-foreground">e.g., B.Ed 2024, FYUP Sem 1</p>
-          </CardContent>
-        </Card>
+        <EnrolledStudentsCard />
         <AvailableRoomsCard />
       </div>
       <div className="grid grid-cols-1 gap-4 md:gap-8 lg:grid-cols-2 xl:grid-cols-3">
