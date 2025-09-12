@@ -29,6 +29,7 @@ import {
 import {Button} from '@/components/ui/button';
 import {Badge} from '@/components/ui/badge';
 import { AvailableRoomsCard } from '@/components/available-rooms-card';
+import { CoursesDialogCard } from '@/components/courses-dialog-card';
 
 const chartData = [
   {name: 'CSE', conflicts: 12},
@@ -71,16 +72,7 @@ export default function DashboardPage() {
   return (
     <div className="flex flex-col gap-4 py-4 md:gap-8">
       <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Courses</CardTitle>
-            <BookCopy className="size-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">125</div>
-            <p className="text-xs text-muted-foreground">+5 from last semester</p>
-          </CardContent>
-        </Card>
+        <CoursesDialogCard />
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Faculty Members</CardTitle>
