@@ -24,28 +24,28 @@ const nepRules = [
     icon: Star,
     title: 'Flexible Curriculum Structure',
     description:
-      'Students can choose subjects from different disciplines (Major, Minor, and Skill-Based courses) to create a personalized degree path.',
+      'NEP 2020 emphasizes a flexible, choice-based curriculum. For timetabling, this means accounting for: 1) Major (Core) Subjects: The primary field of study. 2) Minor Subjects: A secondary field of study from a different discipline. 3) Interdisciplinary Courses: Subjects open to students from any department. 4) Vocational Courses: Skill-based training integrated into the degree.',
   },
   {
     value: 'item-2',
     icon: Book,
     title: 'Credit-Based System',
     description:
-      'Courses are assigned credits based on learning hours. A minimum number of credits must be earned in Major, Minor, and other course categories to graduate.',
+      "All courses are assigned credits based on learning hours. The system must track each student's accumulated credits via the Academic Bank of Credits (ABC). Timetables must ensure students can meet the required credits for their Major, Minor, and other categories within the specified timeframe.",
   },
   {
     value: 'item-3',
     icon: Users,
     title: 'Multi-Disciplinary Approach',
     description:
-      'Timetables must accommodate inter-departmental classes, allowing students from one discipline to take courses offered by another.',
+      'Institutional silos are broken down, allowing students to take courses from various departments. The timetable must resolve potential clashes for common courses that are popular across different student groups and ensure faculty and classroom availability for these inter-departmental sessions.',
   },
   {
     value: 'item-4',
     icon: Target,
-    title: 'Skill Enhancement Courses (SEC) & Ability Enhancement Courses (AEC)',
+    title: 'Skill & Ability Enhancement',
     description:
-      'Dedicated slots for SEC and AEC are mandatory to ensure holistic development. These are often common courses for multiple student groups.',
+      'The curriculum must include: 1) Skill Enhancement Courses (SEC): To develop practical, job-oriented skills. 2) Ability Enhancement Courses (AEC): To improve language and communication skills. 3) Value-Added Courses (VAC): To instill humanistic, ethical, and constitutional values. These are often common for all students in a semester.',
   },
 ];
 
