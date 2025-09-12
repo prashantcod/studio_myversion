@@ -8,6 +8,13 @@ import { ScheduleEntry } from '@/app/api/timetable/route';
 export type Course = (typeof initialCourses)[0];
 export type Room = (typeof initialRooms)[0];
 
+export type RecentGeneration = {
+    id: string;
+    date: string;
+    status: 'Completed' | 'Failed';
+    conflicts: number;
+};
+
 export type LeaveRequest = {
     id: string;
     facultyId: string;
@@ -36,6 +43,7 @@ type DataStore = {
     leaveRequests: LeaveRequest[];
     notifications: Notification[];
     timetable: ScheduleEntry[];
+    recentGenerations: RecentGeneration[];
     addFaculty: (faculty: Omit<Faculty, 'id'>) => void;
     addStudentGroup: (group: Omit<StudentGroup, 'id'>) => void;
     addLeaveRequest: (request: Omit<LeaveRequest, 'id' | 'status'>) => void;
@@ -43,6 +51,7 @@ type DataStore = {
     markNotificationAsRead: (id: string) => void;
     bookRoom: (booking: Omit<ScheduleEntry, 'isOnLeave'>) => void;
     setTimetable: (newTimetable: ScheduleEntry[]) => void;
+    updateRecentGeneration: (id: string, updates: Partial<Omit<RecentGeneration, 'id' | 'date'>>) => void;
 };
 
 // In-memory data store
@@ -52,6 +61,32 @@ let dataStore: DataStore = {
     faculty: [...initialFaculty],
     studentGroups: [...initialStudentGroups],
     timetable: [],
+    recentGenerations: [
+         {
+            id: 'GEN-001',
+            date: '2024-07-20',
+            status: 'Failed',
+            conflicts: 3,
+        },
+        {
+            id: 'GEN-002',
+            date: '2024-07-19',
+            status: 'Completed',
+            conflicts: 0,
+        },
+        {
+            id: 'GEN-003',
+            date: '2024-07-18',
+            status: 'Failed',
+            conflicts: 21,
+        },
+        {
+            id: 'GEN-004',
+            date: '2024-07-17',
+            status: 'Completed',
+            conflicts: 1,
+        },
+    ],
     leaveRequests: [
         {
             id: 'LR-DEMO-001',
@@ -199,6 +234,12 @@ let dataStore: DataStore = {
     },
     setTimetable: (newTimetable) => {
         dataStore.timetable = newTimetable;
+    },
+    updateRecentGeneration: (id, updates) => {
+        const generation = dataStore.recentGenerations.find(g => g.id === id);
+        if (generation) {
+            Object.assign(generation, updates);
+        }
     }
 };
 

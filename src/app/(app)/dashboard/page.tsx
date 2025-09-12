@@ -9,7 +9,6 @@ import {
   Users,
 } from 'lucide-react';
 import {Bar, BarChart, ResponsiveContainer, XAxis, YAxis} from 'recharts';
-import Link from 'next/link';
 
 import {
   Card,
@@ -33,6 +32,7 @@ import { CoursesDialogCard } from '@/components/courses-dialog-card';
 import { FacultyDialogCard } from '@/components/faculty-dialog-card';
 import { EnrolledStudentsCard } from '@/components/enrolled-students-card';
 import { ViewGenerationDialog } from '@/components/view-generation-dialog';
+import { useDataStore } from '@/lib/data-store';
 
 const chartData = [
   {name: 'CSE', conflicts: 12},
@@ -44,34 +44,9 @@ const chartData = [
   {name: 'B.Ed', conflicts: 15},
 ];
 
-const recentGenerations = [
-  {
-    id: 'GEN-001',
-    date: '2024-07-20',
-    status: 'Completed',
-    conflicts: 3,
-  },
-  {
-    id: 'GEN-002',
-    date: '2024-07-19',
-    status: 'Completed',
-    conflicts: 0,
-  },
-  {
-    id: 'GEN-003',
-    date: '2024-07-18',
-    status: 'Failed',
-    conflicts: 21,
-  },
-  {
-    id: 'GEN-004',
-    date: '2024-07-17',
-    status: 'Completed',
-    conflicts: 1,
-  },
-];
-
 export default function DashboardPage() {
+  const { recentGenerations } = useDataStore();
+
   return (
     <div className="flex flex-col gap-4 py-4 md:gap-8">
       <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
@@ -115,7 +90,7 @@ export default function DashboardPage() {
                         }
                         className={
                           gen.status === 'Completed'
-                            ? 'bg-green-600/20 text-green-700'
+                            ? 'bg-green-600/20 text-green-700 hover:bg-green-600/30'
                             : ''
                         }
                       >

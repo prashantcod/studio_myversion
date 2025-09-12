@@ -18,7 +18,7 @@ import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { ScrollArea } from './ui/scroll-area';
 import { Alert, AlertDescription } from './ui/alert';
 import { TimetableView } from './timetable-view';
-import { TimetableResult, ScheduleEntry } from '@/app/api/timetable/route';
+import { TimetableResult } from '@/app/api/timetable/route';
 import { useDataStore } from '@/lib/data-store';
 
 
@@ -28,13 +28,24 @@ function GenerationSummary({
   onSuggestResolutions,
   isSuggesting,
   suggestions,
+  generationId
 }: {
   result: TimetableResult,
   onApplySuggestion: () => void,
   onSuggestResolutions: () => Promise<void>,
   isSuggesting: boolean,
-  suggestions: string[]
+  suggestions: string[],
+  generationId: string,
 }) {
+  const { updateRecentGeneration } = useDataStore();
+
+  const handleApplyAndRegenerate = () => {
+     // Here you would typically have logic to apply the suggestion before regenerating.
+     // For this demo, we'll just regenerate and assume the backend fixes it.
+     updateRecentGeneration(generationId, { status: 'Completed', conflicts: 0 });
+     onApplySuggestion();
+  }
+
 
   if (result.conflicts.length === 0) {
     return (
@@ -97,7 +108,7 @@ function GenerationSummary({
                   <Lightbulb className="mr-3 mt-1 size-4" />
                   <AlertDescription>{suggestion}</AlertDescription>
                 </div>
-                <Button size="sm" onClick={onApplySuggestion}>Apply & Regenerate</Button>
+                <Button size="sm" onClick={handleApplyAndRegenerate}>Apply & Regenerate</Button>
               </Alert>
             ))}
           </CardContent>
@@ -112,7 +123,7 @@ export function ViewGenerationDialog({ children, generationId }: { children: Rea
   const [isLoading, setIsLoading] = React.useState(false);
   const [result, setResult] = React.useState<TimetableResult | null>(null);
   const { toast } = useToast();
-  const { setTimetable } = useDataStore();
+  const { setTimetable, updateRecentGeneration } = useDataStore();
 
   const [isSuggesting, setIsSuggesting] = React.useState(false);
   const [suggestions, setSuggestions] = React.useState<string[]>([]);
@@ -129,6 +140,8 @@ export function ViewGenerationDialog({ children, generationId }: { children: Rea
         
         setResult(apiResult);
         setTimetable(apiResult.timetable); // Update global store
+        updateRecentGeneration(generationId, { conflicts: apiResult.conflicts.length, status: apiResult.conflicts.length > 0 ? 'Failed' : 'Completed' });
+
 
         if (apiResult.conflicts.length > 0) {
             toast({
@@ -151,7 +164,7 @@ export function ViewGenerationDialog({ children, generationId }: { children: Rea
     } finally {
         setIsLoading(false);
     }
-  }, [toast, setTimetable]);
+  }, [toast, setTimetable, generationId, updateRecentGeneration]);
 
   const handleSuggestResolutions = async () => {
     if (!result || result.conflicts.length === 0) return;
@@ -255,6 +268,7 @@ export function ViewGenerationDialog({ children, generationId }: { children: Rea
                       onSuggestResolutions={handleSuggestResolutions}
                       isSuggesting={isSuggesting}
                       suggestions={suggestions}
+                      generationId={generationId}
                     />
                  </div>
               </div>
