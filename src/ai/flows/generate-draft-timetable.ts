@@ -74,4 +74,7 @@ const generateDraftTimetableFlow = ai.defineFlow(
     outputSchema: GenerateDraftTimetableOutputSchema,
   },
   async input => {
-    const {output}
+    const {output} = await generateDraftTimetablePrompt(input);
+    return output!;
+  }
+);
