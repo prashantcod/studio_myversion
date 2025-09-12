@@ -1,5 +1,4 @@
 'use server';
-
 import { useDataStore } from './data-store';
 import { summarizeTimetableConflicts } from '@/ai/flows/summarize-timetable-conflicts';
 import { isWithinInterval } from 'date-fns';
