@@ -14,7 +14,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { DoorOpen, Computer, Presentation, ChevronLeft, Clock, Calendar, User, Book } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { SidebarMenuButton, SidebarMenuItem } from './ui/sidebar';
-import { useDataStore, ScheduleEntry } from '@/lib/data-store';
+import { useDataStore } from '@/lib/data-store';
+import { ScheduleEntry } from '@/app/api/timetable/route';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from './ui/badge';
 import { format, addDays, startOfWeek } from 'date-fns';
@@ -140,17 +141,29 @@ const RoomDetailView = ({ room, onBack, onOccupy, schedule }: { room: Room, onBa
 export function RoomsDialog({ children }: { children?: React.ReactNode }) {
   const [filter, setFilter] = React.useState('All');
   const [selectedRoom, setSelectedRoom] = React.useState<Room | null>(null);
-  const { bookRoom, timetable } = useDataStore();
+  const { bookRoom, timetable, faculty } = useDataStore();
   const { toast } = useToast();
+  const [randomIndex, setRandomIndex] = React.useState(0);
+
+   React.useEffect(() => {
+    // Generate a random index only on the client, after hydration
+    setRandomIndex(Math.floor(Math.random() * faculty.length));
+  }, [faculty.length]);
+
 
   const handleOccupy = (day: string, timeSlot: string) => {
     if (!selectedRoom) return;
+
+    const randomFaculty = faculty[randomIndex];
+    
+    // Update index for next time, cycling through faculty
+    setRandomIndex((prevIndex) => (prevIndex + 1) % faculty.length);
 
     const booking: ScheduleEntry = {
         roomId: selectedRoom.name,
         day,
         timeSlot,
-        facultyName: 'Dr. Jane Doe', // Hardcoded for demo
+        facultyName: randomFaculty.name, // Use random faculty name
         courseCode: 'EXT-101', // Placeholder for extra class
         courseName: 'Extra Class',
         studentGroup: 'Ad-hoc'
@@ -160,10 +173,9 @@ export function RoomsDialog({ children }: { children?: React.ReactNode }) {
     
     toast({
         title: "Room Occupied",
-        description: `${selectedRoom.name} has been booked for ${day} at ${timeSlot}.`
+        description: `${selectedRoom.name} has been booked by ${randomFaculty.name} for ${day} at ${timeSlot}.`
     });
 
-    // We don't need to manually update state as the data store change will trigger a re-render
   };
 
   const isRoomAvailableNow = (room: Room) => {
