@@ -15,7 +15,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Users } from 'lucide-react';
-import { useDataStore, Faculty } from '@/lib/data-store';
+import { getFaculty, Faculty } from '@/lib/data-store';
 import { ScrollArea } from './ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { placeholderImages } from '@/lib/placeholder-images.json';
@@ -32,7 +32,6 @@ const getInitials = (name: string) => {
 
 
 export function FacultyDialogCard() {
-  const { getFaculty } = useDataStore();
   const [allFaculty, setAllFaculty] = React.useState<Faculty[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const teacherAvatar = placeholderImages.find(img => img.id === 'user-avatar');
@@ -42,7 +41,7 @@ export function FacultyDialogCard() {
         setAllFaculty(faculty);
         setIsLoading(false);
     });
-  }, [getFaculty]);
+  }, []);
 
 
   return (

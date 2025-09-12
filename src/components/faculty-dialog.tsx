@@ -11,12 +11,12 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, ChevronLeft, BookOpen, Clock, CalendarOff, FileText, Download } from 'lucide-react';
+import { Users, ChevronLeft, BookOpen, Clock } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { SidebarMenuButton, SidebarMenuItem } from './ui/sidebar';
 import { placeholderImages } from '@/lib/placeholder-images.json';
 import { Badge } from './ui/badge';
-import { useDataStore, Faculty } from '@/lib/data-store';
+import { getFaculty, Faculty } from '@/lib/data-store';
 import { Skeleton } from './ui/skeleton';
 
 
@@ -32,16 +32,20 @@ const getInitials = (name: string) => {
 export function FacultyDialog() {
   const [selectedFaculty, setSelectedFaculty] = React.useState<Faculty | null>(null);
   const teacherAvatar = placeholderImages.find(img => img.id === 'user-avatar');
-  const { getFaculty } = useDataStore();
   const [facultyData, setFacultyData] = React.useState<Faculty[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
+  const [isOpen, setIsOpen] = React.useState(false);
+
 
   React.useEffect(() => {
-    getFaculty().then(data => {
-      setFacultyData(data);
-      setIsLoading(false);
-    });
-  }, [getFaculty, selectedFaculty]);
+    if (isOpen) {
+      setIsLoading(true);
+      getFaculty().then(data => {
+        setFacultyData(data);
+        setIsLoading(false);
+      });
+    }
+  }, [isOpen]);
   
 
   const handleFacultySelect = (faculty: Faculty) => {
@@ -52,8 +56,15 @@ export function FacultyDialog() {
     setSelectedFaculty(null);
   };
 
+  const onOpenChange = (open: boolean) => {
+    setIsOpen(open);
+    if (!open) {
+        setSelectedFaculty(null);
+    }
+  }
+
   return (
-    <Dialog onOpenChange={(isOpen) => { if (!isOpen) setSelectedFaculty(null)}}>
+    <Dialog onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
         <SidebarMenuItem>
            <SidebarMenuButton tooltip="Faculty">
@@ -74,7 +85,7 @@ export function FacultyDialog() {
           ) : (
             <>
               <DialogTitle>Faculty Members</DialogTitle>
-              <DialogDescription>Select a faculty member to view their details. {facultyData.length} members found.</DialogDescription>
+              <DialogDescription>Select a faculty member to view their details. {isLoading ? '' : `${facultyData.length} members found.`}</DialogDescription>
             </>
           )}
         </DialogHeader>

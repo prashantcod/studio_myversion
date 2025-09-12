@@ -1,7 +1,7 @@
 
 'use server';
 
-import { useDataStore } from '@/lib/data-store';
+import { addTeacherAction, addStudentGroupAction } from '@/app/actions/add-data';
 import { revalidatePath } from 'next/cache';
 
 function parseCSV(csvContent: string): Record<string, string>[] {
@@ -29,7 +29,6 @@ function parseCSV(csvContent: string): Record<string, string>[] {
 
 export async function uploadDataAction(fileContent: string): Promise<{ success: boolean; message: string }> {
     try {
-        const dataStore = useDataStore();
         const jsonData = parseCSV(fileContent);
 
         if (jsonData.length === 0) {
@@ -51,7 +50,6 @@ export async function uploadDataAction(fileContent: string): Promise<{ success: 
 
             // Teacher-specific keys
             const hasExpertise = 'expertise' in lowerCaseKeys || 'skills' in lowerCaseKeys;
-            const hasAvailability = 'availability' in lowerCaseKeys;
             
             // Student-specific keys
             const hasSize = 'size' in lowerCaseKeys || 'groupsize' in lowerCaseKeys;
@@ -78,7 +76,7 @@ export async function uploadDataAction(fileContent: string): Promise<{ success: 
                     // Ignore parsing errors, use default empty availability
                 }
                 
-                dataStore.addFaculty({
+                await addTeacherAction({
                     name: lowerCaseKeys.name,
                     expertise: expertiseValue ? expertiseValue.split(';').map(e => e.trim()) : [],
                     availability: availabilityObject,
@@ -88,7 +86,7 @@ export async function uploadDataAction(fileContent: string): Promise<{ success: 
             } else if (hasSize && hasCourses) { // Treat as a student group if 'size' and 'courses' are present
                  const coursesValue = lowerCaseKeys.courses || lowerCaseKeys.subjects || '';
                  const sizeValue = lowerCaseKeys.size || lowerCaseKeys.groupsize || '0';
-                 dataStore.addStudentGroup({
+                 await addStudentGroupAction({
                     name: lowerCaseKeys.name,
                     size: parseInt(sizeValue, 10) || 0,
                     courses: coursesValue ? coursesValue.split(';').map(c => c.trim()) : [],

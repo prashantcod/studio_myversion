@@ -11,24 +11,28 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { GraduationCap, Users, ChevronLeft, BookOpen, User } from 'lucide-react';
+import { GraduationCap, Users, ChevronLeft, BookOpen } from 'lucide-react';
 import { SidebarMenuButton, SidebarMenuItem } from './ui/sidebar';
-import { useDataStore, StudentGroup } from '@/lib/data-store';
+import { getStudentGroups, StudentGroup } from '@/lib/data-store';
 import { Badge } from './ui/badge';
 import { Skeleton } from './ui/skeleton';
 
 export function StudentDialog() {
   const [selectedGroup, setSelectedGroup] = React.useState<StudentGroup | null>(null);
-  const { getStudentGroups } = useDataStore();
   const [studentGroups, setStudentGroups] = React.useState<StudentGroup[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
+  const [isOpen, setIsOpen] = React.useState(false);
+
 
   React.useEffect(() => {
-    getStudentGroups().then(data => {
-        setStudentGroups(data);
-        setIsLoading(false);
-    });
-  }, [getStudentGroups, selectedGroup]);
+    if (isOpen) {
+        setIsLoading(true);
+        getStudentGroups().then(data => {
+            setStudentGroups(data);
+            setIsLoading(false);
+        });
+    }
+  }, [isOpen]);
 
   const handleGroupSelect = (group: StudentGroup) => {
     setSelectedGroup(group);
@@ -38,8 +42,15 @@ export function StudentDialog() {
     setSelectedGroup(null);
   };
 
+  const onOpenChange = (open: boolean) => {
+    setIsOpen(open);
+     if(!open) {
+        setSelectedGroup(null)
+     }
+  }
+
   return (
-    <Dialog onOpenChange={(isOpen) => { if(!isOpen) setSelectedGroup(null)}}>
+    <Dialog onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
         <SidebarMenuItem>
            <SidebarMenuButton tooltip="Students">
@@ -60,7 +71,7 @@ export function StudentDialog() {
           ) : (
             <>
               <DialogTitle>Student Groups</DialogTitle>
-              <DialogDescription>Select a group to view its details. {studentGroups.length} groups found.</DialogDescription>
+              <DialogDescription>Select a group to view its details. {isLoading ? '' : `${studentGroups.length} groups found.`}</DialogDescription>
             </>
           )}
         </DialogHeader>
