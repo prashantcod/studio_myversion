@@ -17,9 +17,10 @@ import { Wand2, Loader2, AlertTriangle, Lightbulb, CheckCircle2 } from 'lucide-r
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { ScrollArea } from './ui/scroll-area';
-import { generateTimetable, TimetableResult, getConflictSuggestions } from '@/lib/timetable-generator';
+import { generateTimetable, TimetableResult } from '@/lib/timetable-generator';
 import { Alert, AlertDescription } from './ui/alert';
 import { TimetableView } from './timetable-view';
+import { suggestConflictResolutions } from '@/ai/flows/suggest-conflict-resolutions';
 
 
 function GenerationSummary({ 
@@ -71,7 +72,7 @@ function GenerationSummary({
             ) : (
               <Lightbulb className="mr-2 size-4" />
             )}
-            Suggest Resolutions
+            {isSuggesting ? 'Thinking...' : 'Suggest Resolutions'}
           </Button>
         </CardHeader>
         <CardContent>
@@ -120,9 +121,8 @@ export function GenerateTimetableDialog() {
   const handleGenerate = React.useCallback(async () => {
     setIsLoading(true);
     setResult(null);
-    setSuggestions([]); // Clear previous suggestions
+    setSuggestions([]);
     try {
-      // Adding a slight delay to make the "Applying..." state visible
       await new Promise(resolve => setTimeout(resolve, 500));
       const response = await generateTimetable();
       setResult(response);
@@ -148,12 +148,15 @@ export function GenerateTimetableDialog() {
     setIsSuggesting(true);
     setSuggestions([]);
     try {
-      const response = await getConflictSuggestions(result);
+      const response = await suggestConflictResolutions({
+        conflicts: JSON.stringify(result.conflicts),
+        timetableSnapshot: JSON.stringify(result.timetable),
+      });
       
-      if (response && response.length > 0) {
-        setSuggestions(response);
+      if (response && response.suggestions.length > 0) {
+        setSuggestions(response.suggestions);
       } else {
-        setSuggestions(["No simple resolutions could be found automatically. Consider increasing faculty availability or adding more rooms."]);
+        setSuggestions(["The AI could not find a simple resolution. Consider increasing faculty availability or adding more rooms."]);
       }
 
     } catch (error) {
@@ -161,7 +164,7 @@ export function GenerateTimetableDialog() {
       toast({
         variant: 'destructive',
         title: 'Suggestion Failed',
-        description: 'Could not get suggestions. Please try again.',
+        description: 'Could not get suggestions from the AI. Please try again.',
       });
       setSuggestions(["An error occurred while generating suggestions. Please check the console."]);
     } finally {
