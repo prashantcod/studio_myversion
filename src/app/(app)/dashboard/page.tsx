@@ -69,8 +69,6 @@ export default function DashboardPage() {
                 <TableRow>
                   <TableHead>ID</TableHead>
                   <TableHead>Date</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Conflicts</TableHead>
                   <TableHead>
                     <span className="sr-only">Actions</span>
                   </TableHead>
@@ -81,23 +79,6 @@ export default function DashboardPage() {
                   <TableRow key={gen.id}>
                     <TableCell className="font-medium">{gen.id}</TableCell>
                     <TableCell>{gen.date}</TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={
-                          gen.status === 'Completed'
-                            ? 'default'
-                            : 'destructive'
-                        }
-                        className={
-                          gen.status === 'Completed'
-                            ? 'bg-green-600/20 text-green-700 hover:bg-green-600/30'
-                            : ''
-                        }
-                      >
-                        {gen.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">{gen.conflicts}</TableCell>
                     <TableCell className="text-right">
                       <ViewGenerationDialog generationId={gen.id}>
                          <Button variant="outline" size="sm">View</Button>
