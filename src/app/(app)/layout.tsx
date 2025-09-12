@@ -69,7 +69,6 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
               <CoursesDialog />
               <FacultyDialog />
               <StudentDialog />
-              <RoomsDialog />
             </SidebarGroup>
 
             <SidebarGroup>
