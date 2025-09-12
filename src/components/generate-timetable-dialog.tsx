@@ -17,10 +17,9 @@ import { Wand2, Loader2, AlertTriangle, Lightbulb, CheckCircle2 } from 'lucide-r
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { ScrollArea } from './ui/scroll-area';
-import { generateTimetable, TimetableResult } from '@/lib/timetable-generator';
+import { generateTimetable, TimetableResult, getConflictSuggestions } from '@/lib/timetable-generator';
 import { Alert, AlertDescription } from './ui/alert';
 import { TimetableView } from './timetable-view';
-import { suggestConflictResolutions } from '@/ai/flows/suggest-conflict-resolutions';
 
 
 function GenerationSummary({ 
@@ -148,15 +147,13 @@ export function GenerateTimetableDialog() {
     setIsSuggesting(true);
     setSuggestions([]);
     try {
-      const response = await suggestConflictResolutions({
-        conflicts: JSON.stringify(result.conflicts),
-        timetableSnapshot: JSON.stringify(result.timetable),
-      });
+      // Use the local backend suggestion function
+      const response = await getConflictSuggestions(result.conflicts, result.timetable);
       
-      if (response && response.suggestions.length > 0) {
-        setSuggestions(response.suggestions);
+      if (response && response.length > 0) {
+        setSuggestions(response);
       } else {
-        setSuggestions(["The AI could not find a simple resolution. Consider increasing faculty availability or adding more rooms."]);
+        setSuggestions(["The suggestion engine could not find a simple resolution. Consider increasing faculty availability or adding more rooms."]);
       }
 
     } catch (error) {
@@ -164,7 +161,7 @@ export function GenerateTimetableDialog() {
       toast({
         variant: 'destructive',
         title: 'Suggestion Failed',
-        description: 'Could not get suggestions from the AI. Please try again.',
+        description: 'Could not get suggestions from the backend. Please try again.',
       });
       setSuggestions(["An error occurred while generating suggestions. Please check the console."]);
     } finally {
