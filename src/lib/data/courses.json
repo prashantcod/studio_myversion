@@ -1,21 +1,21 @@
 
 {
   "courses": [
-    { "code": "CSE101", "name": "Intro to Programming", "credits": 4, "type": "Theory", "department": "CSE" },
-    { "code": "CSE101L", "name": "Intro to Programming Lab", "credits": 1, "type": "Practical", "department": "CSE" },
-    { "code": "CSE201", "name": "Data Structures", "credits": 4, "type": "Theory", "department": "CSE" },
-    { "code": "CSE201L", "name": "Data Structures Lab", "credits": 1, "type": "Practical", "department": "CSE" },
-    { "code": "CSE301", "name": "Advanced Algorithms", "credits": 4, "type": "Theory", "department": "CSE" },
-    { "code": "ECE101", "name": "Basic Electronics", "credits": 4, "type": "Theory", "department": "ECE" },
-    { "code": "ECE101L", "name": "Basic Electronics Lab", "credits": 1, "type": "Practical", "department": "ECE" },
-    { "code": "ECE205", "name": "Digital Circuits", "credits": 4, "type": "Theory", "department": "ECE" },
-    { "code": "MECH210", "name": "Thermodynamics", "credits": 4, "type": "Theory", "department": "MECH" },
-    { "code": "ITC402", "name": "Cryptography", "credits": 3, "type": "Theory", "department": "IT" },
-    { "code": "PHY101", "name": "Introductory Physics", "credits": 3, "type": "Theory", "department": "FYUP" },
-    { "code": "CHEM101", "name": "Introductory Chemistry", "credits": 3, "type": "Theory", "department": "FYUP" },
-    { "code": "MATH101", "name": "Calculus I", "credits": 4, "type": "Theory", "department": "FYUP" },
-    { "code": "ENG101", "name": "English Communication", "credits": 2, "type": "Theory", "department": "FYUP" },
-    { "code": "BEDU301", "name": "Educational Psychology", "credits": 4, "type": "Theory", "department": "B.Ed" },
-    { "code": "BEDU402", "name": "Curriculum Design", "credits": 3, "type": "Theory", "department": "B.Ed" }
+    { "code": "CSE101", "name": "Intro to Programming", "credits": 4, "type": "Theory", "department": "CSE", "category": "Major" },
+    { "code": "CSE101L", "name": "Intro to Programming Lab", "credits": 1, "type": "Practical", "department": "CSE", "category": "Major" },
+    { "code": "CSE201", "name": "Data Structures", "credits": 4, "type": "Theory", "department": "CSE", "category": "Major" },
+    { "code": "CSE201L", "name": "Data Structures Lab", "credits": 1, "type": "Practical", "department": "CSE", "category": "Major" },
+    { "code": "CSE301", "name": "Advanced Algorithms", "credits": 4, "type": "Theory", "department": "CSE", "category": "Major" },
+    { "code": "ECE101", "name": "Basic Electronics", "credits": 4, "type": "Theory", "department": "ECE", "category": "Major" },
+    { "code": "ECE101L", "name": "Basic Electronics Lab", "credits": 1, "type": "Practical", "department": "ECE", "category": "Major" },
+    { "code": "ECE205", "name": "Digital Circuits", "credits": 4, "type": "Theory", "department": "ECE", "category": "Minor" },
+    { "code": "MECH210", "name": "Thermodynamics", "credits": 4, "type": "Theory", "department": "MECH", "category": "Minor" },
+    { "code": "ITC402", "name": "Cryptography", "credits": 3, "type": "Theory", "department": "IT", "category": "Elective" },
+    { "code": "PHY101", "name": "Introductory Physics", "credits": 3, "type": "Theory", "department": "FYUP", "category": "Minor" },
+    { "code": "CHEM101", "name": "Introductory Chemistry", "credits": 3, "type": "Theory", "department": "FYUP", "category": "Minor" },
+    { "code": "MATH101", "name": "Calculus I", "credits": 4, "type": "Theory", "department": "FYUP", "category": "Major" },
+    { "code": "ENG101", "name": "English Communication", "credits": 2, "type": "Theory", "department": "FYUP", "category": "Elective" },
+    { "code": "BEDU301", "name": "Educational Psychology", "credits": 4, "type": "Theory", "department": "B.Ed", "category": "Major" },
+    { "code": "BEDU402", "name": "Curriculum Design", "credits": 3, "type": "Theory", "department": "B.Ed", "category": "Major" }
   ]
 }

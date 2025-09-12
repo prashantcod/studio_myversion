@@ -22,11 +22,14 @@ import {
 } from '@/components/ui/table';
 import { placeholderImages } from '@/lib/placeholder-images.json';
 import { Badge } from '@/components/ui/badge';
-import { useDataStore } from '@/lib/data-store';
+import { useDataStore, Course } from '@/lib/data-store';
 import { TimetableView } from '@/components/timetable-view';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
+// Helper type for course with category
+type CategorizedCourse = Course & { category: string };
 
 export default function StudentDashboardPage() {
   const studentAvatar = placeholderImages.find(img => img.id === 'user-avatar');
@@ -43,9 +46,23 @@ export default function StudentDashboardPage() {
   // Find the group the logged-in student belongs to
   const myGroup = studentGroups.find(group => group.name === loggedInStudent?.groupName);
   
-  const myCourses = myGroup?.courses.map(courseCode => 
-    courses.find(c => c.code === courseCode)
-  ).filter(Boolean) || [];
+  const myCourses = useMemo(() => 
+    myGroup?.courses.map(courseCode => 
+      courses.find(c => c.code === courseCode)
+    ).filter(Boolean) as CategorizedCourse[] || [],
+  [myGroup, courses]);
+
+  const groupedCourses = useMemo(() => {
+    return myCourses.reduce((acc, course) => {
+      const category = course.category || 'Elective'; // Default to Elective if not specified
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      acc[category].push(course);
+      return acc;
+    }, {} as Record<string, CategorizedCourse[]>);
+  }, [myCourses]);
+
 
   const mySchedule = myGroup ? timetable.filter(entry => entry.studentGroup === myGroup.name) : [];
   
@@ -88,31 +105,43 @@ export default function StudentDashboardPage() {
         <Card className="md:col-span-2">
             <CardHeader>
                 <CardTitle>My Enrolled Courses</CardTitle>
-                <CardDescription>A list of all your subjects for this semester.</CardDescription>
+                <CardDescription>A list of all your subjects for this semester, categorized by type.</CardDescription>
             </CardHeader>
             <CardContent>
-                 <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Code</TableHead>
-                            <TableHead>Name</TableHead>
-                            <TableHead>Credits</TableHead>
-                            <TableHead>Type</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {myCourses.map((course) => course && (
-                            <TableRow key={course.code}>
-                                <TableCell className="font-medium">{course.code}</TableCell>
-                                <TableCell>{course.name}</TableCell>
-                                <TableCell>{course.credits}</TableCell>
-                                <TableCell>
-                                    <Badge variant={course.type === 'Practical' ? 'default' : 'secondary'}>{course.type}</Badge>
-                                </TableCell>
-                            </TableRow>
+                 <Tabs defaultValue="Major">
+                    <TabsList>
+                        {Object.keys(groupedCourses).map(category => (
+                             <TabsTrigger key={category} value={category}>{category}</TabsTrigger>
                         ))}
-                    </TableBody>
-                </Table>
+                    </TabsList>
+
+                    {Object.entries(groupedCourses).map(([category, coursesInCategory]) => (
+                        <TabsContent key={category} value={category}>
+                             <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Code</TableHead>
+                                        <TableHead>Name</TableHead>
+                                        <TableHead>Credits</TableHead>
+                                        <TableHead>Type</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {coursesInCategory.map((course) => course && (
+                                        <TableRow key={course.code}>
+                                            <TableCell className="font-medium">{course.code}</TableCell>
+                                            <TableCell>{course.name}</TableCell>
+                                            <TableCell>{course.credits}</TableCell>
+                                            <TableCell>
+                                                <Badge variant={course.type === 'Practical' ? 'default' : 'secondary'}>{course.type}</Badge>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </TabsContent>
+                    ))}
+                </Tabs>
             </CardContent>
         </Card>
       </div>

@@ -1,11 +1,12 @@
 
+
 import { courses as initialCourses } from './data/courses.json';
 import { rooms as initialRooms } from './data/rooms.json';
 import { faculty as initialFaculty, Faculty } from './data/faculty.json';
 import { studentGroups as initialStudentGroups, StudentGroup, Student } from './data/students.json';
 import { ScheduleEntry } from '@/app/api/timetable/route';
 
-export type Course = (typeof initialCourses)[0];
+export type Course = (typeof initialCourses)[0] & { category?: string };
 export type Room = (typeof initialRooms)[0];
 
 export type LoggedInStudent = Student & {
