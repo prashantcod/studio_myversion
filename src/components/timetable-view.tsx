@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import { Badge } from './ui/badge';
 import { ScrollArea } from './ui/scroll-area';
 
-const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
 // Helper to get all unique time slots from the schedule and sort them
 const getSortedTimeSlots = (schedule: ScheduleEntry[]): string[] => {
@@ -73,7 +73,7 @@ export function TimetableView({ schedule }: { schedule: ScheduleEntry[] }) {
 
     return (
         <div className="w-full overflow-x-auto rounded-lg border">
-            <div className="grid min-w-[1000px] grid-cols-[auto_1fr_1fr_1fr_1fr_1fr_1fr]">
+            <div className="grid min-w-[1000px] grid-cols-[auto_1fr_1fr_1fr_1fr_1fr]">
                 {/* Header */}
                 <div className="sticky left-0 top-0 z-10 border-b border-r bg-card p-2 text-center text-sm font-semibold">Time</div>
                 {DAYS.map(day => (

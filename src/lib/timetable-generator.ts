@@ -4,7 +4,7 @@
 import { useDataStore } from './data-store';
 import { summarizeTimetableConflicts } from '@/ai/flows/summarize-timetable-conflicts';
 
-const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 export type ScheduleEntry = {
   day: string;
