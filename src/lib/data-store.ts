@@ -36,7 +36,17 @@ let dataStore: DataStore = {
     rooms: initialRooms,
     faculty: [...initialFaculty],
     studentGroups: [...initialStudentGroups],
-    leaveRequests: [],
+    leaveRequests: [
+        {
+            id: 'LR-DEMO-001',
+            facultyId: 'F001',
+            facultyName: 'Dr. Alan Turing',
+            startDate: new Date(),
+            endDate: new Date(new Date().setDate(new Date().getDate() + 2)),
+            reason: 'Attending the International Conference on Computational Theory. I will be unavailable for all scheduled classes during this period.',
+            status: 'pending'
+        }
+    ],
     addFaculty: (faculty) => {
         const newFaculty = { ...faculty, id: `F${Date.now()}` };
         dataStore.faculty.push(newFaculty);
