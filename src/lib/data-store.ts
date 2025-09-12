@@ -2,7 +2,7 @@
 import { courses as initialCourses } from './data/courses.json';
 import { rooms as initialRooms } from './data/rooms.json';
 import { faculty as initialFaculty, Faculty } from './data/faculty.json';
-import { studentGroups as initialStudentGroups, StudentGroup } from './data/students.json';
+import { studentGroups as initialStudentGroups, StudentGroup, Student } from './data/students.json';
 import { ScheduleEntry } from '@/app/api/timetable/route';
 
 export type Course = (typeof initialCourses)[0];
@@ -46,6 +46,7 @@ type DataStore = {
     recentGenerations: RecentGeneration[];
     addFaculty: (faculty: Omit<Faculty, 'id'>) => void;
     addStudentGroup: (group: Omit<StudentGroup, 'id'>) => void;
+    addStudentToGroup: (groupId: string, student: Student) => void;
     addLeaveRequest: (request: Omit<LeaveRequest, 'id' | 'status'>) => void;
     updateLeaveRequestStatus: (id: string, status: LeaveRequest['status']) => void;
     markNotificationAsRead: (id: string) => void;
@@ -178,6 +179,16 @@ let dataStore: DataStore = {
     addStudentGroup: (group) => {
         const newGroup = { ...group, id: crypto.randomUUID() };
         dataStore.studentGroups.push(newGroup);
+    },
+    addStudentToGroup: (groupId, student) => {
+        const group = dataStore.studentGroups.find(g => g.id === groupId);
+        if (group) {
+            if (!group.students) {
+                group.students = [];
+            }
+            group.students.push(student);
+            group.size = group.students.length;
+        }
     },
     addLeaveRequest: (request) => {
         const newRequest: LeaveRequest = {

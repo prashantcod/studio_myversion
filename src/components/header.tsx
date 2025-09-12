@@ -52,7 +52,7 @@ export function Header() {
                 <Link href="/teacher/dashboard">Teacher</Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href="/dashboard">Student</Link>
+                <Link href="/student/login">Student</Link>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
