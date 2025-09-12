@@ -1,0 +1,10 @@
+
+{
+  "studentGroups": [
+    { "id": "CSE_YEAR_1", "name": "Computer Science - 1st Year", "size": 55, "courses": ["CSE101", "CSE101L", "PHY101"] },
+    { "id": "CSE_YEAR_2", "name": "Computer Science - 2nd Year", "size": 50, "courses": ["CSE201", "CSE201L"] },
+    { "id": "ECE_YEAR_1", "name": "Electronics - 1st Year", "size": 50, "courses": ["ECE101", "ECE101L", "CHEM101"] },
+    { "id": "MECH_YEAR_2", "name": "Mechanical - 2nd Year", "size": 65, "courses": ["MECH210"] },
+    { "id": "BED_YEAR_3", "name": "B.Ed - 3rd Year", "size": 40, "courses": ["BEDU301"] }
+  ]
+}

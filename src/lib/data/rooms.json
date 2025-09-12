@@ -1,0 +1,10 @@
+
+{
+  "rooms": [
+    { "id": "CR101", "type": "Classroom", "capacity": 60 },
+    { "id": "CR102", "type": "Classroom", "capacity": 60 },
+    { "id": "CR201", "type": "Classroom", "capacity": 70 },
+    { "id": "LAB01", "type": "Lab", "capacity": 30 },
+    { "id": "LAB02", "type": "Lab", "capacity": 30 }
+  ]
+}
