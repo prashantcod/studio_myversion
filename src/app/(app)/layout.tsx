@@ -31,6 +31,7 @@ import {Logo} from '@/components/logo';
 import { DataEntryDialog } from '@/components/data-entry-dialog';
 import { FacultyDialog } from '@/components/faculty-dialog';
 import { GenerateTimetableDialog } from '@/components/generate-timetable-dialog';
+import { StudentDialog } from '@/components/student-dialog';
 
 export default function AppLayout({children}: {children: React.ReactNode}) {
   return (
@@ -72,14 +73,7 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <FacultyDialog />
-              <SidebarMenuItem>
-                <SidebarMenuButton href="/dashboard" asChild tooltip="Students">
-                  <Link href="/dashboard">
-                    <GraduationCap />
-                    Students
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              <StudentDialog />
               <SidebarMenuItem>
                 <SidebarMenuButton href="/dashboard" asChild tooltip="Rooms">
                   <Link href="/dashboard">
