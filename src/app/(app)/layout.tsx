@@ -37,6 +37,7 @@ import { StudentDialog } from '@/components/student-dialog';
 import { CoursesDialog } from '@/components/courses-dialog';
 import { NepRulesDialog } from '@/components/nep-rules-dialog';
 import { NotificationsDialog } from '@/components/notifications-dialog';
+import { RoomsDialog } from '@/components/rooms-dialog';
 
 export default function AppLayout({children}: {children: React.ReactNode}) {
   return (
@@ -72,13 +73,21 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
               <CoursesDialog />
               <FacultyDialog />
               <StudentDialog />
-              <NepRulesDialog />
+              <RoomsDialog />
             </SidebarGroup>
 
             <SidebarGroup>
               <SidebarGroupLabel>Core</SidebarGroupLabel>
               <GenerateTimetableDialog />
               <NotificationsDialog />
+              <SidebarMenuItem>
+                <SidebarMenuButton href="/timetable" asChild tooltip="View Timetable">
+                  <Link href="/timetable">
+                    <Calendar />
+                    View Timetable
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarGroup>
 
             <SidebarGroup>

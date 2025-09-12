@@ -18,16 +18,28 @@ export type LeaveRequest = {
     status: 'pending' | 'approved' | 'rejected';
 };
 
+export type Notification = {
+    id: string;
+    type: 'leaveRequest' | 'timetableGenerated' | 'conflictResolved';
+    title: string;
+    description: string;
+    isRead: boolean;
+    timestamp: Date;
+    payload: Record<string, any>;
+}
+
 type DataStore = {
     courses: Course[];
     rooms: Room[];
     faculty: Faculty[];
     studentGroups: StudentGroup[];
     leaveRequests: LeaveRequest[];
+    notifications: Notification[];
     addFaculty: (faculty: Omit<Faculty, 'id'>) => void;
     addStudentGroup: (group: Omit<StudentGroup, 'id'>) => void;
     addLeaveRequest: (request: Omit<LeaveRequest, 'id' | 'status'>) => void;
     updateLeaveRequestStatus: (id: string, status: LeaveRequest['status']) => void;
+    markNotificationAsRead: (id: string) => void;
 };
 
 // In-memory data store
@@ -47,6 +59,39 @@ let dataStore: DataStore = {
             status: 'pending'
         }
     ],
+    notifications: [
+        {
+            id: 'NOTIF-001',
+            type: 'leaveRequest',
+            title: 'New Leave Request',
+            description: 'Dr. Alan Turing has requested leave.',
+            isRead: false,
+            timestamp: new Date(),
+            payload: {
+                leaveRequestId: 'LR-DEMO-001'
+            }
+        },
+        {
+            id: 'NOTIF-002',
+            type: 'timetableGenerated',
+            title: 'Timetable Generated',
+            description: 'A new master timetable was successfully generated with 2 conflicts.',
+            isRead: true,
+            timestamp: new Date(new Date().setDate(new Date().getDate() -1)),
+            payload: {
+                conflictCount: 2
+            }
+        },
+        {
+            id: 'NOTIF-003',
+            type: 'conflictResolved',
+            title: 'Conflicts Resolved',
+            description: 'All scheduling conflicts have been successfully resolved.',
+            isRead: true,
+            timestamp: new Date(new Date().setDate(new Date().getDate() -2)),
+            payload: {}
+        }
+    ],
     addFaculty: (faculty) => {
         const newFaculty = { ...faculty, id: `F${Date.now()}` };
         dataStore.faculty.push(newFaculty);
@@ -62,11 +107,35 @@ let dataStore: DataStore = {
             status: 'pending'
         };
         dataStore.leaveRequests.push(newRequest);
+        
+        // Also create a notification
+        const newNotification: Notification = {
+            id: `NOTIF-${Date.now()}`,
+            type: 'leaveRequest',
+            title: 'New Leave Request',
+            description: `${newRequest.facultyName} has requested leave.`,
+            isRead: false,
+            timestamp: new Date(),
+            payload: {
+                leaveRequestId: newRequest.id
+            }
+        };
+        dataStore.notifications.unshift(newNotification);
     },
     updateLeaveRequestStatus: (id, status) => {
         const request = dataStore.leaveRequests.find(lr => lr.id === id);
         if (request) {
             request.status = status;
+        }
+        const notification = dataStore.notifications.find(n => n.payload.leaveRequestId === id);
+        if(notification) {
+            notification.isRead = true;
+        }
+    },
+    markNotificationAsRead: (id) => {
+        const notification = dataStore.notifications.find(n => n.id === id);
+        if (notification) {
+            notification.isRead = true;
         }
     }
 };

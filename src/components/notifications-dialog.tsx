@@ -8,26 +8,42 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogFooter
+  DialogFooter,
 } from '@/components/ui/dialog';
 import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuBadge,
 } from '@/components/ui/sidebar';
-import { Bell, User, Calendar, MessageSquare, Check, X, ChevronLeft } from 'lucide-react';
+import { Bell, User, Calendar, MessageSquare, Check, X, ChevronLeft, Wand2, CheckCircle, Loader2 } from 'lucide-react';
 import { Button } from './ui/button';
-import { useDataStore, LeaveRequest } from '@/lib/data-store';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { format } from 'date-fns';
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from 'recharts';
+import { useDataStore, LeaveRequest, Notification, ScheduleEntry } from '@/lib/data-store';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
+import { format, formatDistanceToNow } from 'date-fns';
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { useToast } from '@/hooks/use-toast';
-import { generateTimetable, ScheduleEntry } from '@/lib/timetable-generator';
+import { generateTimetable } from '@/lib/timetable-generator';
+import { useRouter } from 'next/navigation';
+import { cn } from '@/lib/utils';
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+const PIE_COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
-const LeaveRequestDetail = ({ request, onBack, onApprove }: { request: LeaveRequest; onBack: () => void; onApprove: (id: string) => void; }) => {
+
+const LeaveRequestDetail = ({ 
+    request, 
+    onBack, 
+    onApprove, 
+    onReject 
+}: { 
+    request: LeaveRequest; 
+    onBack: () => void; 
+    onApprove: (id: string) => void;
+    onReject: (id: string) => void;
+}) => {
     const [affectedClasses, setAffectedClasses] = React.useState<ScheduleEntry[]>([]);
+    const [isGenerating, setIsGenerating] = React.useState(false);
+    const router = useRouter();
+    const { toast } = useToast();
 
     React.useEffect(() => {
         const getAffectedClasses = async () => {
@@ -41,10 +57,11 @@ const LeaveRequestDetail = ({ request, onBack, onApprove }: { request: LeaveRequ
     }, [request.facultyName]);
 
     const classesByCourse = affectedClasses.reduce((acc, entry) => {
-        if (!acc[entry.courseName]) {
-            acc[entry.courseName] = 0;
+        const key = `${entry.courseCode} (${entry.studentGroup})`;
+        if (!acc[key]) {
+            acc[key] = 0;
         }
-        acc[entry.courseName]++;
+        acc[key]++;
         return acc;
     }, {} as Record<string, number>);
 
@@ -53,8 +70,28 @@ const LeaveRequestDetail = ({ request, onBack, onApprove }: { request: LeaveRequ
         value: classesByCourse[key]
     }));
 
+    const handleRegenerate = async () => {
+        setIsGenerating(true);
+        try {
+            await generateTimetable();
+            toast({
+                title: "Timetable Updated",
+                description: "The master timetable has been regenerated to reflect the approved leave.",
+            });
+            router.push('/timetable'); // Navigate to timetable view
+        } catch (error) {
+            toast({
+                variant: 'destructive',
+                title: 'Generation Failed',
+                description: 'Could not regenerate the timetable.'
+            })
+        } finally {
+            setIsGenerating(false);
+        }
+    }
+
   return (
-    <div>
+    <div className="min-h-[450px]">
         <div className="flex items-center gap-2 mb-4">
             <Button variant="ghost" size="icon" onClick={onBack}>
                 <ChevronLeft />
@@ -87,34 +124,52 @@ const LeaveRequestDetail = ({ request, onBack, onApprove }: { request: LeaveRequ
                 </CardContent>
             </Card>
              <div className="mt-4 flex gap-2">
-                <Button className="w-full" onClick={() => onApprove(request.id)}>
-                    <Check className="mr-2" />Approve
-                </Button>
-                <Button variant="destructive" className="w-full">
-                    <X className="mr-2" />Reject
-                </Button>
+                {request.status === 'pending' && (
+                    <>
+                        <Button className="w-full" onClick={() => onApprove(request.id)}>
+                            <Check className="mr-2" />Approve
+                        </Button>
+                        <Button variant="destructive" className="w-full" onClick={() => onReject(request.id)}>
+                            <X className="mr-2" />Reject
+                        </Button>
+                    </>
+                )}
+                 {request.status === 'approved' && (
+                    <Button className="w-full" onClick={handleRegenerate} disabled={isGenerating}>
+                        {isGenerating ? <Loader2 className="mr-2 animate-spin"/> : <Wand2 className="mr-2"/>}
+                        {isGenerating ? 'Regenerating...' : 'Regenerate Timetable'}
+                    </Button>
+                )}
             </div>
         </div>
         <div>
             <Card>
                 <CardHeader>
                     <CardTitle>Impact on Schedule</CardTitle>
+                    <CardDescription>This leave will affect {affectedClasses.length} scheduled classes.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     {affectedClasses.length > 0 ? (
-                        <>
-                         <p className="text-sm text-muted-foreground mb-4">This leave will affect {affectedClasses.length} classes.</p>
-                        <ResponsiveContainer width="100%" height={200}>
+                        <ResponsiveContainer width="100%" height={250}>
                             <PieChart>
-                                <Pie data={chartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} fill="#8884d8" label>
+                                <Pie data={chartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} labelLine={false} label={({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
+                                    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+                                    const x  = cx + radius * Math.cos(-midAngle * (Math.PI / 180));
+                                    const y = cy + radius * Math.sin(-midAngle * (Math.PI / 180));
+                                    return (
+                                        <text x={x} y={y} fill="white" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central">
+                                            {`${(percent * 100).toFixed(0)}%`}
+                                        </text>
+                                    );
+                                }}>
                                     {chartData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                        <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
                                     ))}
                                 </Pie>
+                                <Tooltip />
                                 <Legend />
                             </PieChart>
                         </ResponsiveContainer>
-                        </>
                     ) : (
                         <p className="text-sm text-muted-foreground text-center py-12">This faculty member has no scheduled classes during this period.</p>
                     )}
@@ -126,29 +181,62 @@ const LeaveRequestDetail = ({ request, onBack, onApprove }: { request: LeaveRequ
   );
 };
 
+const NOTIFICATION_ICONS = {
+    leaveRequest: <Calendar className="size-5 text-blue-500" />,
+    timetableGenerated: <Wand2 className="size-5 text-purple-500" />,
+    conflictResolved: <CheckCircle className="size-5 text-green-500" />,
+};
+
 
 export function NotificationsDialog() {
-  const { leaveRequests, updateLeaveRequestStatus } = useDataStore();
-  const [selectedRequest, setSelectedRequest] = React.useState<LeaveRequest | null>(null);
+  const { notifications, leaveRequests, updateLeaveRequestStatus, markNotificationAsRead } = useDataStore();
+  const [selectedNotification, setSelectedNotification] = React.useState<Notification | null>(null);
   const { toast } = useToast();
 
-  const pendingRequests = leaveRequests.filter(lr => lr.status === 'pending');
-  const unreadCount = pendingRequests.length;
+  const unreadCount = notifications.filter(n => !n.isRead).length;
   
-  const handleApprove = (id: string) => {
-    updateLeaveRequestStatus(id, 'approved');
+  const handleApprove = (leaveRequestId: string) => {
+    updateLeaveRequestStatus(leaveRequestId, 'approved');
     toast({
         title: "Leave Approved",
-        description: "The teacher's leave has been approved. Regenerate the timetable to apply changes.",
+        description: "The teacher's leave has been approved. You can now regenerate the timetable.",
     });
-    setSelectedRequest(null); // Go back to the list
+    // Refresh the selected request to show the change in status
+    const notif = notifications.find(n => n.payload.leaveRequestId === leaveRequestId);
+    if(notif) setSelectedNotification(notif);
+  }
+
+  const handleReject = (leaveRequestId: string) => {
+    updateLeaveRequestStatus(leaveRequestId, 'rejected');
+     toast({
+        variant: 'destructive',
+        title: "Leave Rejected",
+        description: "The teacher's leave request has been rejected.",
+    });
+    setSelectedNotification(null);
   }
   
-  const onOpenChange = (open: boolean) => {
-    if (!open) {
-        setSelectedRequest(null);
+  const handleNotificationClick = (notification: Notification) => {
+    if (notification.type === 'leaveRequest') {
+        setSelectedNotification(notification);
+    }
+    if (!notification.isRead) {
+        markNotificationAsRead(notification.id);
     }
   }
+
+  const onOpenChange = (open: boolean) => {
+    if (!open) {
+        setSelectedNotification(null);
+    }
+  }
+
+  const getLeaveRequestFromNotification = (notification: Notification | null): LeaveRequest | undefined => {
+    if (!notification || notification.type !== 'leaveRequest') return undefined;
+    return leaveRequests.find(lr => lr.id === notification.payload.leaveRequestId);
+  }
+
+  const selectedLeaveRequest = getLeaveRequestFromNotification(selectedNotification);
 
   return (
     <Dialog onOpenChange={onOpenChange}>
@@ -163,31 +251,38 @@ export function NotificationsDialog() {
           </SidebarMenuButton>
         </SidebarMenuItem>
       </DialogTrigger>
-      <DialogContent className={selectedRequest ? "sm:max-w-3xl" : "sm:max-w-md"}>
-        {!selectedRequest ? (
+      <DialogContent className={selectedNotification ? "sm:max-w-4xl" : "sm:max-w-md"}>
+        {!selectedNotification ? (
           <>
             <DialogHeader>
               <DialogTitle>Notifications</DialogTitle>
               <DialogDescription>
                 {unreadCount > 0
-                  ? `You have ${unreadCount} new leave requests to review.`
+                  ? `You have ${unreadCount} unread notifications.`
                   : 'No new notifications.'}
               </DialogDescription>
             </DialogHeader>
-            <div className="py-4 space-y-4">
-              {pendingRequests.length > 0 ? pendingRequests.map(request => (
+            <div className="py-4 space-y-2 max-h-96 overflow-y-auto">
+              {notifications.length > 0 ? notifications.map(notification => (
                 <div
-                  key={request.id}
-                  className="flex items-start gap-4 p-4 rounded-lg border cursor-pointer hover:bg-muted/50"
-                  onClick={() => setSelectedRequest(request)}
+                  key={notification.id}
+                  className={cn(
+                      "flex items-start gap-4 p-4 rounded-lg border cursor-pointer hover:bg-muted/50 transition-colors",
+                      !notification.isRead && "bg-blue-500/5"
+                  )}
+                  onClick={() => handleNotificationClick(notification)}
                 >
-                  <Calendar className="size-5 text-blue-500" />
+                  {NOTIFICATION_ICONS[notification.type]}
                   <div className="flex-1">
-                    <p className="font-semibold">Leave Request from {request.facultyName}</p>
+                    <p className="font-semibold">{notification.title}</p>
                     <p className="text-sm text-muted-foreground">
-                      For dates: {format(request.startDate, 'MMM d')} - {format(request.endDate, 'MMM d')}
+                      {notification.description}
+                    </p>
+                     <p className="text-xs text-muted-foreground/80 mt-1">
+                        {formatDistanceToNow(notification.timestamp, { addSuffix: true })}
                     </p>
                   </div>
+                  {!notification.isRead && <div className="size-2 rounded-full bg-blue-500 mt-1.5" />}
                 </div>
               )) : (
                  <div className="text-center text-muted-foreground py-12">
@@ -201,7 +296,20 @@ export function NotificationsDialog() {
             </DialogFooter>
           </>
         ) : (
-          <LeaveRequestDetail request={selectedRequest} onBack={() => setSelectedRequest(null)} onApprove={handleApprove} />
+            selectedLeaveRequest ? (
+                <LeaveRequestDetail 
+                    request={selectedLeaveRequest} 
+                    onBack={() => setSelectedNotification(null)} 
+                    onApprove={handleApprove}
+                    onReject={handleReject}
+                />
+            ) : (
+                // Fallback for non-leave notifications or if data is missing
+                <div className="text-center py-12">
+                    <p>This notification has no detailed view.</p>
+                    <Button onClick={() => setSelectedNotification(null)} className="mt-4">Back to notifications</Button>
+                </div>
+            )
         )}
       </DialogContent>
     </Dialog>

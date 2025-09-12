@@ -24,28 +24,28 @@ const nepRules = [
     icon: Star,
     title: 'Flexible Curriculum Structure',
     description:
-      'NEP 2020 emphasizes a flexible, choice-based curriculum. For timetabling, this means accounting for: 1) Major (Core) Subjects: The primary field of study. 2) Minor Subjects: A secondary field of study from a different discipline. 3) Interdisciplinary Courses: Subjects open to students from any department. 4) Vocational Courses: Skill-based training integrated into the degree.',
+      "NEP 2020 introduces a highly flexible and choice-based curriculum. Timetabling must accommodate multiple entry/exit points and a diverse range of subject combinations. Key components include: Major (Core) Subjects: The student's primary field of study, forming the bulk of their credits. Minor Subjects: A secondary field of study, often from a different discipline, allowing for broader knowledge. Interdisciplinary Courses: Subjects available to students from any department to foster cross-domain expertise. Vocational & Skill Courses: Practical, skill-based training integrated into the degree to enhance employability.",
   },
   {
     value: 'item-2',
     icon: Book,
-    title: 'Credit-Based System',
+    title: 'Credit-Based System & ABC',
     description:
-      "All courses are assigned credits based on learning hours. The system must track each student's accumulated credits via the Academic Bank of Credits (ABC). Timetables must ensure students can meet the required credits for their Major, Minor, and other categories within the specified timeframe.",
+      "All courses are assigned credits based on learning hours (lectures, tutorials, practicals). The system tracks each student's accumulated credits through the Academic Bank of Credits (ABC), a national-level digital repository. The timetable must be structured to ensure that students can fulfill the credit requirements for their Major, Minor, and other categories within the specified semester, while also allowing them to take on additional credits if they choose.",
   },
   {
     value: 'item-3',
     icon: Users,
     title: 'Multi-Disciplinary Approach',
     description:
-      'Institutional silos are broken down, allowing students to take courses from various departments. The timetable must resolve potential clashes for common courses that are popular across different student groups and ensure faculty and classroom availability for these inter-departmental sessions.',
+      "A core principle of NEP is breaking down the hard silos between arts, science, and commerce. This allows students to take courses from various departments. From a timetabling perspective, this is a major challenge. The system must resolve potential clashes for popular interdisciplinary courses that are in demand across different student groups. It requires sophisticated logic to ensure faculty, classrooms, and labs are available for these shared, high-demand sessions without disrupting the core schedules of each department.",
   },
   {
     value: 'item-4',
     icon: Target,
     title: 'Skill & Ability Enhancement',
     description:
-      'The curriculum must include: 1) Skill Enhancement Courses (SEC): To develop practical, job-oriented skills. 2) Ability Enhancement Courses (AEC): To improve language and communication skills. 3) Value-Added Courses (VAC): To instill humanistic, ethical, and constitutional values. These are often common for all students in a semester.',
+      'The curriculum mandates the inclusion of several types of enhancement courses: Skill Enhancement Courses (SEC): Designed to develop practical, job-oriented skills. Ability Enhancement Courses (AEC): Focused on improving language and communication abilities. Value-Added Courses (VAC): Aimed at instilling humanistic, ethical, and constitutional values. These courses are often common for all first-year or second-year students, creating large, combined classes that must be scheduled without conflicting with a wide array of other major/minor subjects.',
   },
 ];
 
