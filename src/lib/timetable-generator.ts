@@ -12,7 +12,7 @@ const TIME_SLOTS = [
   '14:00-15:00', '15:00-16:00', '16:00-17:00'
 ];
 
-type ScheduleEntry = {
+export type ScheduleEntry = {
   day: string;
   timeSlot: string;
   courseCode: string;
@@ -116,4 +116,64 @@ export const generateTimetable = async (): Promise<TimetableResult> => {
       resolve({ timetable, conflicts });
     }, 1500); // Simulate 1.5 seconds of processing time
   });
+};
+
+/**
+ * A simple, rule-based suggestion engine for timetable conflicts.
+ */
+export const getConflictSuggestions = async (result: TimetableResult): Promise<string[]> => {
+  const suggestions: string[] = [];
+  const { conflicts, timetable } = result;
+
+  // Build a map of currently used slots for faster lookups
+  const scheduleTracker: Record<string, boolean> = {};
+  for (const entry of timetable) {
+      const faculty = faculty.find(f => f.name === entry.facultyName);
+      const studentGroup = studentGroups.find(sg => sg.name === entry.studentGroup);
+      
+      if(faculty) scheduleTracker[`${faculty.id}_${entry.day}_${entry.timeSlot}`] = true;
+      scheduleTracker[`${entry.roomId}_${entry.day}_${entry.timeSlot}`] = true;
+      if (studentGroup) scheduleTracker[`${studentGroup.id}_${entry.day}_${entry.timeSlot}`] = true;
+  }
+
+  for (const conflict of conflicts) {
+    const match = conflict.match(/Could not find any available slot for (.*) for group (.*)/);
+    if (match) {
+      const courseCode = match[1];
+      const studentGroupName = match[2];
+      
+      const course = courses.find(c => c.code === courseCode);
+      const studentGroup = studentGroups.find(sg => sg.name === studentGroupName);
+      const suitableFaculty = faculty.find(f => f.expertise.includes(courseCode));
+      
+      if (!course || !studentGroup || !suitableFaculty) continue;
+
+      const suitableRoom = rooms.find(r => 
+        (course.type === 'Practical' ? r.type === 'Lab' : r.type === 'Classroom') &&
+        r.capacity >= studentGroup.size
+      );
+      if (!suitableRoom) continue;
+
+      // Strategy 1: Find a completely empty slot for everyone involved.
+      for (const day of DAYS) {
+        for (const timeSlot of TIME_SLOTS) {
+            const facultySlotKey = `${suitableFaculty.id}_${day}_${timeSlot}`;
+            const roomSlotKey = `${suitableRoom.id}_${day}_${timeSlot}`;
+            const studentGroupSlotKey = `${studentGroup.id}_${day}_${timeSlot}`;
+
+            if (!scheduleTracker[facultySlotKey] && !scheduleTracker[roomSlotKey] && !scheduleTracker[studentGroupSlotKey]) {
+                const suggestion = `Move the '${course.name}' for '${studentGroup.name}' to ${day} at ${timeSlot} in ${suitableRoom.id}.`;
+                if (!suggestions.includes(suggestion)) {
+                    suggestions.push(suggestion);
+                }
+                // Stop after finding one suggestion for this conflict to keep it simple
+                break;
+            }
+        }
+        if (suggestions.length > 0) break; // Break outer loop too
+      }
+    }
+  }
+
+  return suggestions;
 };

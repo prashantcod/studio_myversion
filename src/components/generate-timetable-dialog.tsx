@@ -17,8 +17,7 @@ import { Wand2, Loader2, AlertTriangle, Lightbulb, CheckCircle2 } from 'lucide-r
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { ScrollArea } from './ui/scroll-area';
-import { generateTimetable, TimetableResult, ScheduleEntry } from '@/lib/timetable-generator';
-import { suggestConflictResolutions } from '@/ai/flows/suggest-conflict-resolutions';
+import { generateTimetable, TimetableResult, getConflictSuggestions } from '@/lib/timetable-generator';
 import { Alert, AlertDescription } from './ui/alert';
 import { TimetableView } from './timetable-view';
 
@@ -34,17 +33,14 @@ function GenerationSummary({ result, onApplySuggestion }: { result: TimetableRes
     setIsSuggesting(true);
     setSuggestions([]);
     try {
-      const conflictText = result.conflicts.join('\n');
-      const response = await suggestConflictResolutions({
-        conflictDescription: `The following conflicts occurred during timetable generation:\n${conflictText}`,
-        timetableSnapshot: JSON.stringify(result.timetable, null, 2),
-      });
+      // This is now calling our local suggestion engine
+      const response = await getConflictSuggestions(result);
       
-      if (response.suggestedResolutions && response.suggestedResolutions.length > 0) {
-        setSuggestions(response.suggestedResolutions);
+      if (response && response.length > 0) {
+        setSuggestions(response);
       } else {
-        // Fallback suggestion
-        setSuggestions(["Try increasing faculty availability or adding more rooms to resolve the remaining conflicts."]);
+        // Fallback suggestion if the local engine can't find a simple fix
+        setSuggestions(["No simple resolutions could be found automatically. Consider increasing faculty availability or adding more rooms."]);
       }
 
     } catch (error) {
@@ -52,10 +48,10 @@ function GenerationSummary({ result, onApplySuggestion }: { result: TimetableRes
       toast({
         variant: 'destructive',
         title: 'Suggestion Failed',
-        description: 'Could not get suggestions from the AI. Using fallback.',
+        description: 'Could not get suggestions. Please try again.',
       });
       // Fallback suggestion
-      setSuggestions(["Try swapping two classes manually to resolve a resource clash."]);
+      setSuggestions(["An error occurred while generating suggestions. Please check the console."]);
     } finally {
       setIsSuggesting(false);
     }
