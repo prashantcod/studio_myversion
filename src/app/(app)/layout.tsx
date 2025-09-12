@@ -29,6 +29,7 @@ import {UserNav} from '@/components/user-nav';
 import {Logo} from '@/components/logo';
 import { DataEntryDialog } from '@/components/data-entry-dialog';
 import { FacultyDialog } from '@/components/faculty-dialog';
+import { GenerateTimetableDialog } from '@/components/generate-timetable-dialog';
 
 export default function AppLayout({children}: {children: React.ReactNode}) {
   return (
@@ -90,14 +91,7 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
 
             <SidebarGroup>
               <SidebarGroupLabel>Core</SidebarGroupLabel>
-              <SidebarMenuItem>
-                <SidebarMenuButton href="/dashboard" asChild tooltip="Generate">
-                  <Link href="/dashboard">
-                    <Wand2 />
-                    Generate Timetable
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              <GenerateTimetableDialog />
             </SidebarGroup>
           </SidebarMenu>
         </SidebarContent>
