@@ -1,3 +1,4 @@
+"use client";
 
 import Link from "next/link";
 import {
@@ -17,13 +18,18 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { placeholderImages } from "@/lib/placeholder-images.json"
+import { useRouter } from "next/navigation";
 
 type UserNavProps = {
   userType?: 'admin' | 'teacher' | 'student';
 }
 
 export function UserNav({ userType = 'admin' }: UserNavProps) {
-  const userAvatar = placeholderImages.find(img => img.id === 'user-avatar');
+  const router = useRouter();
+  
+  // Use different avatars based on user type
+  const avatarId = userType === 'teacher' ? 'teacher-avatar' : 'user-avatar';
+  const userAvatar = placeholderImages.find(img => img.id === avatarId);
 
   const users = {
     admin: {
@@ -48,8 +54,8 @@ export function UserNav({ userType = 'admin' }: UserNavProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-          <Avatar className="h-9 w-9">
+        <Button variant="ghost" className="relative h-8 w-8 rounded-full p-0">
+          <Avatar className="h-8 w-8">
             {userAvatar && <AvatarImage src={userAvatar.imageUrl} alt="User avatar" data-ai-hint={userAvatar.imageHint} />}
             <AvatarFallback>{currentUser.fallback}</AvatarFallback>
           </Avatar>
@@ -76,11 +82,9 @@ export function UserNav({ userType = 'admin' }: UserNavProps) {
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <Link href="/">
-            Log out
-            <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
-          </Link>
+        <DropdownMenuItem onClick={() => { localStorage.removeItem('auth'); router.push('/login'); }}>
+          Log out
+          <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

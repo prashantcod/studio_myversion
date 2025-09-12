@@ -77,9 +77,9 @@ export function OnLeaveDialog() {
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
         <SidebarMenuItem>
-            <SidebarMenuButton>
-                <CalendarOff />
-                On Leave
+            <SidebarMenuButton className="gap-2.5 py-1.5">
+                <CalendarOff className="size-4" />
+                <span className="text-sm">On Leave</span>
             </SidebarMenuButton>
         </SidebarMenuItem>
       </DialogTrigger>

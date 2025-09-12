@@ -54,9 +54,9 @@ export function NepRulesDialog() {
     <Dialog>
       <DialogTrigger asChild>
         <SidebarMenuItem>
-          <SidebarMenuButton tooltip="NEP Rules">
-            <Scale />
-            NEP Rules
+          <SidebarMenuButton tooltip="NEP Rules" className="gap-2.5 py-1.5">
+            <Scale className="size-4" />
+            <span className="text-sm">NEP Rules</span>
           </SidebarMenuButton>
         </SidebarMenuItem>
       </DialogTrigger>

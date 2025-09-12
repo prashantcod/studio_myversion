@@ -1,4 +1,3 @@
-
 import Link from 'next/link';
 import {
   BookOpen,
@@ -26,82 +25,85 @@ import {UserNav} from '@/components/user-nav';
 import {Logo} from '@/components/logo';
 import {OnLeaveDialog} from '@/components/on-leave-dialog';
 import { NepRulesDialog } from '@/components/nep-rules-dialog';
+import AuthGuard from '@/components/auth-guard';
 
 export default function TeacherLayout({children}: {children: React.ReactNode}) {
   return (
     <SidebarProvider>
-      <Sidebar>
-        <SidebarHeader>
-          <Button variant="ghost" className="-ml-2 flex items-center gap-2">
-            <Logo className="text-primary" />
-            <span className="font-headline text-lg font-semibold">
-              NEP Timetable AI
-            </span>
-          </Button>
-        </SidebarHeader>
-        <SidebarContent>
-          <SidebarMenu className="TeacherSection">
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                href="/teacher/dashboard"
-                asChild
-                isActive
-                tooltip="Dashboard"
-              >
-                <Link href="/teacher/dashboard">
-                  <LayoutDashboard />
-                  Dashboard
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-
-            <SidebarGroup>
-              <SidebarGroupLabel>Academics</SidebarGroupLabel>
+      <AuthGuard allowedRole="teacher">
+        <Sidebar>
+          <SidebarHeader className="h-12 px-3">
+            <Button variant="ghost" className="-ml-2 flex h-8 items-center gap-1.5 px-2">
+              <Logo className="h-5 text-primary" />
+              <span className="font-headline text-sm font-semibold">
+                NEP Timetable AI
+              </span>
+            </Button>
+          </SidebarHeader>
+          <SidebarContent className="py-1.5">
+            <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton
-                  href="/teacher/dashboard"
                   asChild
-                  tooltip="My Courses"
+                  isActive
+                  tooltip="Dashboard"
+                  className="gap-2.5 py-1.5"
                 >
                   <Link href="/teacher/dashboard">
-                    <BookOpen />
-                    My Courses
+                    <LayoutDashboard className="size-4" />
+                    <span className="text-sm">Dashboard</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  href="/teacher/dashboard"
-                  asChild
-                  tooltip="Materials"
-                >
-                  <Link href="/teacher/dashboard">
-                    <FileText />
-                    Materials
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <OnLeaveDialog />
-            </SidebarGroup>
 
-            <SidebarGroup>
-              <SidebarGroupLabel>Guidelines</SidebarGroupLabel>
-              <NepRulesDialog />
-            </SidebarGroup>
-          </SidebarMenu>
-        </SidebarContent>
-      </Sidebar>
-      <SidebarInset>
-        <header className="flex h-14 items-center justify-between gap-4 border-b bg-background p-4 sm:px-6">
-          <SidebarTrigger className="md:hidden" />
-          <div className="flex flex-1 items-center justify-end">
-            <UserNav userType="teacher" />
-          </div>
-        </header>
-        <main className="flex-1 overflow-auto p-4 sm:px-6 sm:py-0">
-          {children}
-        </main>
-      </SidebarInset>
+              <SidebarGroup>
+                <SidebarGroupLabel className="py-1.5 text-xs">Academics</SidebarGroupLabel>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    tooltip="My Courses"
+                    className="gap-2.5 py-1.5"
+                  >
+                    <Link href="/teacher/dashboard">
+                      <BookOpen className="size-4" />
+                      <span className="text-sm">My Courses</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    tooltip="Materials"
+                    className="gap-2.5 py-1.5"
+                  >
+                    <Link href="/teacher/dashboard">
+                      <FileText className="size-4" />
+                      <span className="text-sm">Materials</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <OnLeaveDialog />
+              </SidebarGroup>
+
+              <SidebarGroup>
+                <SidebarGroupLabel className="py-1.5 text-xs">Guidelines</SidebarGroupLabel>
+                <NepRulesDialog />
+              </SidebarGroup>
+            </SidebarMenu>
+          </SidebarContent>
+        </Sidebar>
+        <SidebarInset>
+          <header className="flex h-12 items-center justify-between border-b bg-background px-3 sm:px-5">
+            <SidebarTrigger className="md:hidden" />
+            <div className="flex flex-1 items-center justify-end">
+              <UserNav userType="teacher" />
+            </div>
+          </header>
+          <main className="flex-1 overflow-auto p-3 sm:px-5">
+            {children}
+          </main>
+        </SidebarInset>
+      </AuthGuard>
     </SidebarProvider>
   );
 }
