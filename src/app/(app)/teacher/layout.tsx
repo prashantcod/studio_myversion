@@ -25,6 +25,7 @@ import {Button} from '@/components/ui/button';
 import {UserNav} from '@/components/user-nav';
 import {Logo} from '@/components/logo';
 import {OnLeaveDialog} from '@/components/on-leave-dialog';
+import { NepRulesDialog } from '@/components/nep-rules-dialog';
 
 export default function TeacherLayout({children}: {children: React.ReactNode}) {
   return (
@@ -85,18 +86,7 @@ export default function TeacherLayout({children}: {children: React.ReactNode}) {
 
             <SidebarGroup>
               <SidebarGroupLabel>Guidelines</SidebarGroupLabel>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  href="/teacher/dashboard"
-                  asChild
-                  tooltip="NEP Rules"
-                >
-                  <Link href="/teacher/dashboard">
-                    <Scale />
-                    NEP Rules
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              <NepRulesDialog />
             </SidebarGroup>
           </SidebarMenu>
         </SidebarContent>
