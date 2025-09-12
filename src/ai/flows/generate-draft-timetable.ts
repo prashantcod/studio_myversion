@@ -54,16 +54,34 @@ const generateDraftTimetablePrompt = ai.definePrompt({
   name: 'generateDraftTimetablePrompt',
   input: {schema: GenerateDraftTimetableInputSchema},
   output: {schema: GenerateDraftTimetableOutputSchema},
-  prompt: `You are an AI timetable generator that is able to generate conflict-free and optimized timetables based on the input data.
+  prompt: `You are an expert AI system designed to generate university timetables. Your methodology is a hybrid approach, combining a **Constraint Solver** for hard constraints and a **Genetic Algorithm** for optimization.
 
-  Your inputs are:
-  - Course Data: {{{courseData}}}
-  - Faculty Availability: {{{facultyAvailability}}}
-  - Student Preferences: {{{studentPreferences}}}
-  - Room Availability: {{{roomAvailability}}}
+Your primary goal is to create a **conflict-free** and **optimized** weekly timetable that strictly adheres to **NEP 2020 guidelines**.
 
-  Generate a draft timetable in a structured format (e.g., JSON, CSV), list any scheduling conflicts detected, and provide suggestions for resolving these conflicts and optimizing the timetable.
-  Make sure that timetable aligned with NEP 2020 which is based on multidisciplinary, flexibility, credit-based learning.
+**Your Inputs:**
+- Course Data: {{{courseData}}}
+- Faculty Availability & Workload: {{{facultyAvailability}}}
+- Student Elective Choices: {{{studentPreferences}}}
+- Room Availability & Capacity: {{{roomAvailability}}}
+
+**Constraint Satisfaction (Hard Rules - MUST be met):**
+1.  **No Clashes:** A faculty member, a student group, or a room cannot be scheduled for more than one class at the same time.
+2.  **Availability:** All scheduling must respect the specified availability of faculty and rooms.
+3.  **Credit Hours:** Ensure the total scheduled hours for each course match its credit requirements (theory/practical split).
+4.  **Room Capacity:** A class cannot be scheduled in a room with a capacity smaller than the number of enrolled students.
+5.  **Room Type:** Practical sessions must be in labs; theory classes in classrooms.
+
+**Genetic Algorithm Optimization (Soft Goals - STRIVE to achieve):**
+1.  **Minimize Teacher Workload:** Distribute teaching hours evenly across the week. Avoid scheduling a single teacher for too many consecutive hours.
+2.  **Compact Schedules:** Minimize gaps in schedules for both students and faculty.
+3.  **NEP Flexibility:** Effectively accommodate major, minor, skill-based, and ability enhancement courses. Prioritize student elective choices.
+4.  **Maximize Preferred Slots:** Whenever possible, schedule faculty during their preferred teaching times.
+
+**Your Task:**
+1.  Analyze all the provided data and constraints.
+2.  Generate a draft timetable in a clear, structured JSON format. The JSON should be an array of schedule entries, where each entry contains: {day, time_slot, course_code, course_name, faculty_name, room_name, student_group}.
+3.  Identify and list any remaining hard constraint violations as 'conflicts'. If the timetable is conflict-free, state this clearly.
+4.  Provide actionable 'suggestions' for further optimization based on the soft goals.
 `,
 });
 
