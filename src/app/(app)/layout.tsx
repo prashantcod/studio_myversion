@@ -32,6 +32,7 @@ import { DataEntryDialog } from '@/components/data-entry-dialog';
 import { FacultyDialog } from '@/components/faculty-dialog';
 import { GenerateTimetableDialog } from '@/components/generate-timetable-dialog';
 import { StudentDialog } from '@/components/student-dialog';
+import { CoursesDialog } from '@/components/courses-dialog';
 
 export default function AppLayout({children}: {children: React.ReactNode}) {
   return (
@@ -64,14 +65,7 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
             <SidebarGroup>
               <SidebarGroupLabel>Data Management</SidebarGroupLabel>
               <DataEntryDialog />
-              <SidebarMenuItem>
-                <SidebarMenuButton href="/dashboard" asChild tooltip="Courses">
-                  <Link href="/dashboard">
-                    <BookCopy />
-                    Courses
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              <CoursesDialog />
               <FacultyDialog />
               <StudentDialog />
               <SidebarMenuItem>
