@@ -10,6 +10,7 @@ import {
   DoorOpen,
   ClipboardEdit,
   Calendar,
+  Bell,
 } from 'lucide-react';
 
 import {
@@ -33,8 +34,8 @@ import { FacultyDialog } from '@/components/faculty-dialog';
 import { GenerateTimetableDialog } from '@/components/generate-timetable-dialog';
 import { StudentDialog } from '@/components/student-dialog';
 import { CoursesDialog } from '@/components/courses-dialog';
-import { RoomsDialog } from '@/components/rooms-dialog';
 import { NepRulesDialog } from '@/components/nep-rules-dialog';
+import { NotificationsDialog } from '@/components/notifications-dialog';
 
 export default function AppLayout({children}: {children: React.ReactNode}) {
   return (
@@ -83,6 +84,7 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+              <NotificationsDialog />
             </SidebarGroup>
 
             <SidebarGroup>
