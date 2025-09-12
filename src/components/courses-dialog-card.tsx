@@ -23,13 +23,21 @@ import {
     TableRow,
   } from '@/components/ui/table';
 import { BookCopy, FileText } from 'lucide-react';
-import { useDataStore } from '@/lib/data-store';
+import { useDataStore, Course } from '@/lib/data-store';
 import { ScrollArea } from './ui/scroll-area';
 import { Badge } from './ui/badge';
+import { Skeleton } from './ui/skeleton';
 
 export function CoursesDialogCard() {
   const { getCourses } = useDataStore();
-  const allCourses = getCourses();
+  const [allCourses, setAllCourses] = React.useState<Course[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const courses = getCourses();
+    setAllCourses(courses);
+    setIsLoading(false);
+  }, [getCourses]);
 
   return (
     <Dialog>
@@ -40,7 +48,7 @@ export function CoursesDialogCard() {
             <BookCopy className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{allCourses.length}</div>
+            {isLoading ? <Skeleton className="h-7 w-12" /> : <div className="text-2xl font-bold">{allCourses.length}</div> }
             <p className="text-xs text-muted-foreground">Click to view all courses</p>
           </CardContent>
         </Card>

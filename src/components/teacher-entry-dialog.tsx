@@ -15,20 +15,19 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useDataStore } from '@/lib/data-store';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
+import { addTeacherAction } from '@/app/actions/add-data';
 
 export function TeacherEntryDialog() {
-    const { addFaculty } = useDataStore();
     const router = useRouter();
     const [name, setName] = useState('');
     const [expertise, setExpertise] = useState('');
     const [isOpen, setIsOpen] = useState(false);
     const { toast } = useToast();
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (!name || !expertise) {
             toast({
                 variant: 'destructive',
@@ -38,22 +37,29 @@ export function TeacherEntryDialog() {
             return;
         }
 
-        addFaculty({
+        const result = await addTeacherAction({
             name,
             expertise: expertise.split(',').map(e => e.trim()),
-            // Default availability, can be edited later
             availability: { Monday: [], Tuesday: [], Wednesday: [], Thursday: [], Friday: [] }
         });
         
-        toast({
-            title: 'Teacher Added',
-            description: `${name} has been added to the faculty.`,
-        });
-
-        router.refresh();
-        setName('');
-        setExpertise('');
-        setIsOpen(false);
+        if (result.success) {
+            toast({
+                title: 'Teacher Added',
+                description: `${name} has been added to the faculty.`,
+            });
+    
+            router.refresh();
+            setName('');
+            setExpertise('');
+            setIsOpen(false);
+        } else {
+             toast({
+                variant: 'destructive',
+                title: 'Failed to Add Teacher',
+                description: result.message,
+            });
+        }
     }
 
     const onOpenChange = (open: boolean) => {

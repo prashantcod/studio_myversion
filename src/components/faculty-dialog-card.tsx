@@ -15,10 +15,11 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Users } from 'lucide-react';
-import { useDataStore } from '@/lib/data-store';
+import { useDataStore, Faculty } from '@/lib/data-store';
 import { ScrollArea } from './ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { placeholderImages } from '@/lib/placeholder-images.json';
+import { Skeleton } from './ui/skeleton';
 
 const getInitials = (name: string) => {
     if (!name) return '??';
@@ -32,8 +33,17 @@ const getInitials = (name: string) => {
 
 export function FacultyDialogCard() {
   const { getFaculty } = useDataStore();
-  const allFaculty = getFaculty();
+  const [allFaculty, setAllFaculty] = React.useState<Faculty[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
   const teacherAvatar = placeholderImages.find(img => img.id === 'user-avatar');
+
+  React.useEffect(() => {
+    getFaculty().then(faculty => {
+        setAllFaculty(faculty);
+        setIsLoading(false);
+    });
+  }, [getFaculty]);
+
 
   return (
     <Dialog>
@@ -44,7 +54,7 @@ export function FacultyDialogCard() {
             <Users className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{allFaculty.length}</div>
+            {isLoading ? <Skeleton className="h-7 w-12" /> : <div className="text-2xl font-bold">{allFaculty.length}</div>}
             <p className="text-xs text-muted-foreground">Click to view all faculty</p>
           </CardContent>
         </Card>
@@ -58,7 +68,17 @@ export function FacultyDialogCard() {
         </DialogHeader>
         <ScrollArea className="h-96">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {allFaculty.map(faculty => (
+              {isLoading ? Array.from({length: 4}).map((_, i) => (
+                <Card key={i}>
+                    <CardContent className="flex items-center gap-4 p-4">
+                        <Skeleton className="h-10 w-10 rounded-full" />
+                        <div>
+                            <Skeleton className="h-4 w-24" />
+                            <Skeleton className="mt-2 h-3 w-32" />
+                        </div>
+                    </CardContent>
+                </Card>
+              )) : allFaculty.map(faculty => (
                 <Card key={faculty.id}>
                   <CardContent className="flex items-center gap-4 p-4">
                     <Avatar>

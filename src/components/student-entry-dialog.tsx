@@ -11,31 +11,70 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogClose,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useDataStore } from '@/lib/data-store';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
+import { addStudentGroupAction } from '@/app/actions/add-data';
 
 export function StudentEntryDialog() {
-  const { addStudentGroup } = useDataStore();
   const router = useRouter();
   const [name, setName] = useState('');
   const [size, setSize] = useState('');
   const [courses, setCourses] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
+  const { toast } = useToast();
 
-  const handleSubmit = () => {
-    addStudentGroup({
+  const handleSubmit = async () => {
+    if (!name || !size || !courses) {
+        toast({
+            variant: 'destructive',
+            title: 'Missing Information',
+            description: 'Please fill out all fields.',
+        });
+        return;
+    }
+
+    const result = await addStudentGroupAction({
         name,
         size: parseInt(size, 10) || 0,
         courses: courses.split(',').map(c => c.trim()),
     });
-    router.refresh();
+
+    if (result.success) {
+      toast({
+          title: 'Student Group Added',
+          description: `${name} has been added.`,
+      });
+      router.refresh();
+      setName('');
+      setSize('');
+      setCourses('');
+      setIsOpen(false);
+    } else {
+       toast({
+          variant: 'destructive',
+          title: 'Failed to Add Group',
+          description: result.message,
+      });
+    }
   }
 
+   const onOpenChange = (open: boolean) => {
+        setIsOpen(open);
+        if(!open) {
+            setName('');
+            setSize('');
+            setCourses('');
+        }
+    }
+
+
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
         <Button variant="outline" className="justify-start">
           <GraduationCap className="mr-2" />
@@ -70,6 +109,9 @@ export function StudentEntryDialog() {
           </div>
         </div>
         <DialogFooter>
+          <DialogClose asChild>
+            <Button variant="ghost">Cancel</Button>
+          </DialogClose>
           <Button type="submit" onClick={handleSubmit}>Save Group</Button>
         </DialogFooter>
       </DialogContent>

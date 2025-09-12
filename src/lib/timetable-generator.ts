@@ -22,21 +22,21 @@ export type TimetableResult = {
 
 // This function simulates a promise-based async operation, like a real API call would be.
 export const generateTimetable = async (): Promise<TimetableResult> => {
-  return new Promise(resolve => {
+  return new Promise(async resolve => {
     // We wrap the logic in a timeout to simulate network latency
-    setTimeout(() => {
+    setTimeout(async () => {
       const { getCourses, getFaculty, getRooms, getStudentGroups } = useDataStore();
       const allCourses = getCourses();
-      const allFaculty = getFaculty();
+      const allFaculty = await getFaculty();
       const allRooms = getRooms();
-      const allStudentGroups = getStudentGroups();
+      const allStudentGroups = await getStudentGroups();
 
       const timetable: ScheduleEntry[] = [];
       const conflicts: string[] = [];
       
       const scheduleTracker: Record<string, boolean> = {};
 
-      const allCoursesToSchedule = allStudentGroups.flatMap(group => 
+      const allCoursesToSchedule = (await Promise.all(allStudentGroups)).flatMap(group => 
         group.courses.map(courseCode => ({
           course: allCourses.find(c => c.code === courseCode),
           studentGroup: group
@@ -116,13 +116,13 @@ export const generateTimetable = async (): Promise<TimetableResult> => {
  * A deterministic, backend-driven suggestion engine to resolve timetable conflicts.
  */
 export const getConflictSuggestions = async (conflicts: string[], timetable: ScheduleEntry[]): Promise<string[]> => {
-    return new Promise(resolve => {
-        setTimeout(() => {
+    return new Promise(async resolve => {
+        setTimeout(async () => {
             const { getCourses, getFaculty, getRooms, getStudentGroups } = useDataStore();
             const allCourses = getCourses();
-            const allFaculty = getFaculty();
+            const allFaculty = await getFaculty();
             const allRooms = getRooms();
-            const allStudentGroups = getStudentGroups();
+            const allStudentGroups = await getStudentGroups();
 
             const suggestions: string[] = [];
             const suggestedFor = new Set<string>();

@@ -16,9 +16,9 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { SidebarMenuButton, SidebarMenuItem } from './ui/sidebar';
 import { placeholderImages } from '@/lib/placeholder-images.json';
 import { Badge } from './ui/badge';
-import { useDataStore } from '@/lib/data-store';
+import { useDataStore, Faculty } from '@/lib/data-store';
+import { Skeleton } from './ui/skeleton';
 
-type Faculty = ReturnType<typeof useDataStore>['faculty'][0];
 
 const getInitials = (name: string) => {
     if (!name) return '??';
@@ -33,7 +33,16 @@ export function FacultyDialog() {
   const [selectedFaculty, setSelectedFaculty] = React.useState<Faculty | null>(null);
   const teacherAvatar = placeholderImages.find(img => img.id === 'user-avatar');
   const { getFaculty } = useDataStore();
-  const facultyData = getFaculty();
+  const [facultyData, setFacultyData] = React.useState<Faculty[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    getFaculty().then(data => {
+      setFacultyData(data);
+      setIsLoading(false);
+    });
+  }, [getFaculty, selectedFaculty]);
+  
 
   const handleFacultySelect = (faculty: Faculty) => {
     setSelectedFaculty(faculty);
@@ -44,7 +53,7 @@ export function FacultyDialog() {
   };
 
   return (
-    <Dialog onOpenChange={() => setSelectedFaculty(null)}>
+    <Dialog onOpenChange={(isOpen) => { if (!isOpen) setSelectedFaculty(null)}}>
       <DialogTrigger asChild>
         <SidebarMenuItem>
            <SidebarMenuButton tooltip="Faculty">
@@ -110,7 +119,17 @@ export function FacultyDialog() {
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-              {facultyData.map(faculty => (
+              {isLoading ? Array.from({length: 6}).map((_, i) => (
+                <Card key={i}>
+                    <CardContent className="flex items-center gap-4 p-4">
+                        <Skeleton className="h-10 w-10 rounded-full" />
+                        <div>
+                            <Skeleton className="h-4 w-24" />
+                            <Skeleton className="mt-2 h-3 w-32" />
+                        </div>
+                    </CardContent>
+                </Card>
+              )) : facultyData.map(faculty => (
                 <Card key={faculty.id} className="cursor-pointer hover:bg-muted/50" onClick={() => handleFacultySelect(faculty)}>
                   <CardContent className="flex items-center gap-4 p-4">
                     <Avatar>

@@ -64,4 +64,9 @@ const dataStore = {
 };
 
 // useDataStore now provides access to your database functions.
-export const useDataStore = () => dataStore;
+export const useDataStore = () => ({
+  getCourses: dataStore.getCourses,
+  getRooms: dataStore.getRooms,
+  getFaculty: dataStore.getFaculty,
+  getStudentGroups: dataStore.getStudentGroups,
+});
