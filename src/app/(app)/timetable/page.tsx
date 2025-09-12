@@ -14,10 +14,10 @@ export default function TimetablePage() {
 
     const fetchTimetable = () => {
         setIsLoading(true);
-        generateTimetable().then(result => {
-            setSchedule(result.timetable);
-            setIsLoading(false);
-        });
+        // We can call the sync function directly now
+        const result = generateTimetable();
+        setSchedule(result.timetable);
+        setIsLoading(false);
     }
 
     useEffect(() => {

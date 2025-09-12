@@ -22,36 +22,84 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogClose,
 } from '@/components/ui/dialog';
-import {SidebarMenuButton} from '@/components/ui/sidebar';
+import {SidebarMenuButton, SidebarMenuItem} from '@/components/ui/sidebar';
+import { Textarea } from './ui/textarea';
+import { useDataStore } from '@/lib/data-store';
+import { useToast } from '@/hooks/use-toast';
+import { Label } from './ui/label';
 
 export function OnLeaveDialog() {
   const [date, setDate] = React.useState<DateRange | undefined>();
+  const [reason, setReason] = React.useState('');
+  const [isOpen, setIsOpen] = React.useState(false);
+  const { addLeaveRequest } = useDataStore();
+  const { toast } = useToast();
+
+  const handleSubmit = () => {
+    if (!date?.from || !reason) {
+        toast({
+            variant: 'destructive',
+            title: 'Missing Information',
+            description: 'Please select a date range and provide a reason.',
+        });
+        return;
+    }
+    
+    // In a real app, you'd get the faculty ID from the logged-in user session
+    addLeaveRequest({
+        facultyId: 'F002', // Hardcoded Dr. Grace Hopper for demo
+        facultyName: 'Dr. Grace Hopper',
+        startDate: date.from,
+        endDate: date.to || date.from,
+        reason,
+    });
+
+    toast({
+        title: 'Leave Request Submitted',
+        description: 'Your request has been sent to the administrator for approval.',
+    });
+
+    setIsOpen(false);
+  };
+  
+  const onOpenChange = (open: boolean) => {
+    setIsOpen(open);
+    if (!open) {
+        setDate(undefined);
+        setReason('');
+    }
+  }
+
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
-        <SidebarMenuButton variant="ghost" className="w-full justify-start">
-          <CalendarOff />
-          On Leave
-        </SidebarMenuButton>
+        <SidebarMenuItem>
+            <SidebarMenuButton>
+                <CalendarOff />
+                On Leave
+            </SidebarMenuButton>
+        </SidebarMenuItem>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Request Leave</DialogTitle>
           <DialogDescription>
-            Select the date(s) you will be on leave.
+            Select the date(s) you will be on leave and provide a reason.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
+          <div className="space-y-2">
+            <Label>Leave Dates</Label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
                   id="date"
                   variant={'outline'}
                   className={cn(
-                    'w-[300px] justify-start text-left font-normal',
+                    'w-full justify-start text-left font-normal',
                     !date && 'text-muted-foreground'
                   )}
                 >
@@ -77,14 +125,21 @@ export function OnLeaveDialog() {
                   defaultMonth={date?.from}
                   selected={date}
                   onSelect={setDate}
-                  numberOfMonths={2}
+                  numberOfMonths={1}
                 />
               </PopoverContent>
             </Popover>
           </div>
+           <div className="space-y-2">
+             <Label htmlFor="reason">Reason for Leave</Label>
+            <Textarea id="reason" placeholder="e.g., Attending a conference" value={reason} onChange={(e) => setReason(e.target.value)} />
+          </div>
         </div>
         <DialogFooter>
-          <Button type="submit">Submit Leave Request</Button>
+          <DialogClose asChild>
+            <Button variant="ghost">Cancel</Button>
+          </DialogClose>
+          <Button type="submit" onClick={handleSubmit}>Submit Leave Request</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -117,28 +117,32 @@ export function GenerateTimetableDialog() {
   const [suggestions, setSuggestions] = React.useState<string[]>([]);
 
 
-  const handleGenerate = React.useCallback(async () => {
+  const handleGenerate = React.useCallback(() => {
     setIsLoading(true);
     setResult(null);
     setSuggestions([]);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      const response = await generateTimetable();
-      setResult(response);
-      toast({
-        title: 'Timetable Generated',
-        description: `${response.timetable.length} classes scheduled with ${response.conflicts.length} conflicts.`,
-      });
-    } catch (error) {
-      console.error('Error generating timetable:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Generation Failed',
-        description: 'An unexpected error occurred.',
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    
+    // Using a timeout to simulate async operation, as the sync function can be too fast
+    setTimeout(() => {
+        try {
+            const response = generateTimetable();
+            setResult(response);
+            toast({
+                title: 'Timetable Generated',
+                description: `${response.timetable.length} classes scheduled with ${response.conflicts.length} conflicts.`,
+            });
+        } catch (error) {
+            console.error('Error generating timetable:', error);
+            toast({
+                variant: 'destructive',
+                title: 'Generation Failed',
+                description: 'An unexpected error occurred.',
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    }, 500);
+
   }, [toast]);
 
   const handleSuggestResolutions = async () => {
@@ -147,7 +151,6 @@ export function GenerateTimetableDialog() {
     setIsSuggesting(true);
     setSuggestions([]);
     try {
-      // Use the local backend suggestion function
       const response = await getConflictSuggestions(result.conflicts, result.timetable);
       
       if (response && response.length > 0) {

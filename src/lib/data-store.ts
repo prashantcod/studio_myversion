@@ -8,13 +8,26 @@ import { studentGroups as initialStudentGroups, StudentGroup } from './data/stud
 export type Course = (typeof initialCourses)[0];
 export type Room = (typeof initialRooms)[0];
 
+export type LeaveRequest = {
+    id: string;
+    facultyId: string;
+    facultyName: string;
+    startDate: Date;
+    endDate: Date;
+    reason: string;
+    status: 'pending' | 'approved' | 'rejected';
+};
+
 type DataStore = {
     courses: Course[];
     rooms: Room[];
     faculty: Faculty[];
     studentGroups: StudentGroup[];
+    leaveRequests: LeaveRequest[];
     addFaculty: (faculty: Omit<Faculty, 'id'>) => void;
     addStudentGroup: (group: Omit<StudentGroup, 'id'>) => void;
+    addLeaveRequest: (request: Omit<LeaveRequest, 'id' | 'status'>) => void;
+    updateLeaveRequestStatus: (id: string, status: LeaveRequest['status']) => void;
 };
 
 // In-memory data store
@@ -23,6 +36,7 @@ let dataStore: DataStore = {
     rooms: initialRooms,
     faculty: [...initialFaculty],
     studentGroups: [...initialStudentGroups],
+    leaveRequests: [],
     addFaculty: (faculty) => {
         const newFaculty = { ...faculty, id: `F${Date.now()}` };
         dataStore.faculty.push(newFaculty);
@@ -31,6 +45,20 @@ let dataStore: DataStore = {
         const newGroup = { ...group, id: `SG${Date.now()}` };
         dataStore.studentGroups.push(newGroup);
     },
+    addLeaveRequest: (request) => {
+        const newRequest: LeaveRequest = {
+            ...request,
+            id: `LR${Date.now()}`,
+            status: 'pending'
+        };
+        dataStore.leaveRequests.push(newRequest);
+    },
+    updateLeaveRequestStatus: (id, status) => {
+        const request = dataStore.leaveRequests.find(lr => lr.id === id);
+        if (request) {
+            request.status = status;
+        }
+    }
 };
 
 export const useDataStore = () => dataStore;
