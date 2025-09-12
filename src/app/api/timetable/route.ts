@@ -190,15 +190,37 @@ export const getConflictSuggestions = async (conflicts: string[], timetable: Sch
             if (course) {
                 const roomType = course.type === 'Practical' ? 'Lab' : 'Classroom';
                 const availableRooms = allRooms.filter(r => r.type === roomType);
-                const largestRoom = availableRooms.reduce((max, room) => room.capacity > max.capacity ? room : max, {capacity: 0});
-                
-                if (largestRoom.capacity > 0 && Number(groupSize) > largestRoom.capacity) {
-                    suggestions.push(`Increase capacity of a ${roomType} or split group '${groupName}'. Largest ${roomType} has capacity ${largestRoom.capacity}, but group size is ${groupSize}.`);
-                    suggestedFor.add(conflict);
-                    suggestionFound = true;
+                if (availableRooms.length > 0) {
+                    const largestRoom = availableRooms.reduce((max, room) => room.capacity > max.capacity ? room : max, {capacity: 0, id: '', type: 'Classroom'});
+                    
+                    if (largestRoom.capacity > 0 && Number(groupSize) > largestRoom.capacity) {
+                        suggestions.push(`Split group '${groupName}' for course '${courseCode}'. Group size is ${groupSize} but largest available ${roomType} ('${largestRoom.id}') only has capacity for ${largestRoom.capacity}.`);
+                        suggestedFor.add(conflict);
+                        suggestionFound = true;
+                    }
+                } else {
+                     suggestions.push(`Add a new ${roomType} to accommodate course '${courseCode}' for group '${groupName}'.`);
+                     suggestedFor.add(conflict);
+                     suggestionFound = true;
                 }
             }
         }
+
+        const facultyConflictMatch = conflict.match(/No faculty with expertise for (.*)/);
+        if (facultyConflictMatch && !suggestionFound) {
+            const [, courseCode] = facultyConflictMatch;
+            const facultyWithExpertise = allFaculty.filter(f => f.expertise.includes(courseCode));
+            if (facultyWithExpertise.length === 0) {
+                 suggestions.push(`Assign expertise for course '${courseCode}' to at least one faculty member.`);
+                 suggestedFor.add(conflict);
+                 suggestionFound = true;
+            } else {
+                 suggestions.push(`All faculty with expertise in '${courseCode}' are fully booked. Try increasing availability for one of: ${facultyWithExpertise.map(f => f.name).join(', ')}.`);
+                 suggestedFor.add(conflict);
+                 suggestionFound = true;
+            }
+        }
+
 
         const slotConflictMatch = conflict.match(/Could not find any available slot for (.*) for group (.*)/);
         if (slotConflictMatch && !suggestionFound) {
@@ -213,12 +235,24 @@ export const getConflictSuggestions = async (conflicts: string[], timetable: Sch
             
             const suitableFaculty = allFaculty.find(f => f.expertise.includes(course.code));
             const suitableRoom = allRooms.find(r =>
-                (course.type === 'Practical' ? 'Lab' : 'Classroom') &&
+                (course.type === 'Practical' ? r.type === 'Lab' : 'Classroom') &&
                 r.capacity >= studentGroup.size
             );
 
-            if (!suitableFaculty || !suitableRoom) continue;
+            if (!suitableFaculty) {
+                // This is handled by the facultyConflictMatch block, but as a fallback.
+                suggestions.push(`No faculty found for '${courseCode}'. Please assign expertise.`);
+                suggestedFor.add(conflictKey);
+                continue;
+            };
+            if (!suitableRoom) {
+                // This is handled by roomConflictMatch, but as a fallback.
+                 suggestions.push(`No room found for '${courseCode}' with size ${studentGroup.size}. Please add a suitable room.`);
+                 suggestedFor.add(conflictKey);
+                 continue;
+            }
 
+            // Check for a completely free alternative slot
             for (const day of DAYS) {
                 if (suggestionFound) break;
                 
@@ -237,15 +271,27 @@ export const getConflictSuggestions = async (conflicts: string[], timetable: Sch
                     }
                 }
             }
+            if(suggestionFound) continue;
+
+            // If no free slot, suggest increasing availability
+            suggestions.push(`Increase availability for faculty '${suitableFaculty.name}' or find an alternative instructor for course '${courseCode}'.`);
+            suggestedFor.add(conflictKey);
         }
     }
-    try {
-        const { summary } = await summarizeTimetableConflicts({conflicts: JSON.stringify(conflicts)});
-        return [summary];
-    } catch (e) {
-        console.error("Failed to get summary from AI", e);
-        return ["Could not generate an AI summary for the conflicts."];
+    
+    // Add AI summary if there are any conflicts
+    if (conflicts.length > 0) {
+        try {
+            const { summary } = await summarizeTimetableConflicts({conflicts: JSON.stringify(conflicts)});
+            // Add AI summary as the first suggestion.
+            suggestions.unshift(summary);
+        } catch (e) {
+            console.error("Failed to get summary from AI", e);
+            suggestions.push("Could not generate an AI summary for the conflicts.");
+        }
     }
+
+    return suggestions;
 };
 
 export async function GET() {
