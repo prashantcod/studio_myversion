@@ -1,4 +1,6 @@
+
 'use server';
+import 'dotenv/config';
 
 /**
  * @fileOverview Suggests resolutions for timetable conflicts using an AI agent.
