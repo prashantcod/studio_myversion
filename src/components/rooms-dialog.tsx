@@ -1,6 +1,6 @@
 
 'use client';
-import *https://www.php8.ltd:/HostLocMJJ/https://github.com/../react';
+import * as React from 'react';
 import {
   Dialog,
   DialogContent,

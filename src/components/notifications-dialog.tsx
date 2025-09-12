@@ -1,6 +1,6 @@
 
 'use client';
-import *https://www.php8.ltd:/HostLocMJJ/https://github.com/../react';
+import * as React from 'react';
 import {
   Dialog,
   DialogContent,
@@ -17,14 +17,14 @@ import {
 } from '@/components/ui/sidebar';
 import { Bell, User, Calendar, MessageSquare, Check, X, ChevronLeft, Wand2, CheckCircle, Loader2, Home } from 'lucide-react';
 import { Button } from './ui/button';
-import { useDataStore, LeaveRequest, Notification, ScheduleEntry } from '@/lib/data-store';
+import { useDataStore, LeaveRequest, Notification } from '@/lib/data-store';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
 import { format, formatDistanceToNow } from 'date-fns';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { useToast } from '@/hooks/use-toast';
-import { generateTimetable } from '@/lib/timetable-generator';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { ScheduleEntry } from '@/app/api/timetable/route';
 
 const PIE_COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
@@ -75,7 +75,8 @@ const LeaveRequestDetail = ({
     const handleRegenerate = async () => {
         setIsGenerating(true);
         try {
-            const result = await generateTimetable();
+            const response = await fetch('/api/timetable');
+            const result = await response.json();
             setTimetable(result.timetable);
             toast({
                 title: "Timetable Updated",

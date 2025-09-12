@@ -17,9 +17,9 @@ import { Wand2, Loader2, AlertTriangle, Lightbulb, CheckCircle2 } from 'lucide-r
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { ScrollArea } from './ui/scroll-area';
-import { generateTimetable, TimetableResult, getConflictSuggestions } from '@/lib/timetable-generator';
 import { Alert, AlertDescription } from './ui/alert';
 import { TimetableView } from './timetable-view';
+import { TimetableResult, ScheduleEntry } from '@/app/api/timetable/route';
 
 
 function GenerationSummary({ 
@@ -123,11 +123,12 @@ export function GenerateTimetableDialog() {
     setSuggestions([]);
     
     try {
-        const response = await generateTimetable();
-        setResult(response);
+        const response = await fetch('/api/timetable');
+        const result: TimetableResult = await response.json();
+        setResult(result);
         toast({
             title: 'Timetable Generated',
-            description: `${response.timetable.length} classes scheduled with ${response.conflicts.length} conflicts.`,
+            description: `${result.timetable.length} classes scheduled with ${result.conflicts.length} conflicts.`,
         });
     } catch (error) {
         console.error('Error generating timetable:', error);
@@ -147,10 +148,17 @@ export function GenerateTimetableDialog() {
     setIsSuggesting(true);
     setSuggestions([]);
     try {
-      const response = await getConflictSuggestions(result.conflicts, result.timetable);
+      const response = await fetch('/api/timetable', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ conflicts: result.conflicts, timetable: result.timetable }),
+      });
+      const { suggestions: responseSuggestions } = await response.json();
       
-      if (response && response.length > 0) {
-        setSuggestions(response);
+      if (responseSuggestions && responseSuggestions.length > 0) {
+        setSuggestions(responseSuggestions);
       } else {
         setSuggestions(["The suggestion engine could not find a simple resolution. Consider increasing faculty availability or adding more rooms."]);
       }

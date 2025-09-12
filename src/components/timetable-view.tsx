@@ -1,7 +1,7 @@
 
 'use client';
 import * as React from 'react';
-import { ScheduleEntry } from '@/lib/timetable-generator';
+import { ScheduleEntry } from '@/app/api/timetable/route';
 import { cn } from '@/lib/utils';
 import { Badge } from './ui/badge';
 import { ScrollArea } from './ui/scroll-area';

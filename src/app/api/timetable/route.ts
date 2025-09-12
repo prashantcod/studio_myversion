@@ -1,5 +1,8 @@
+
 'use server';
-import { useDataStore } from './data-store';
+
+import { NextResponse } from 'next/server';
+import { useDataStore } from '@/lib/data-store';
 import { summarizeTimetableConflicts } from '@/ai/flows/summarize-timetable-conflicts';
 import { isWithinInterval } from 'date-fns';
 
@@ -244,3 +247,24 @@ export const getConflictSuggestions = async (conflicts: string[], timetable: Sch
         return ["Could not generate an AI summary for the conflicts."];
     }
 };
+
+export async function GET() {
+  try {
+    const result = await generateTimetable();
+    return NextResponse.json(result);
+  } catch (error) {
+    console.error('Error generating timetable:', error);
+    return NextResponse.json({ error: 'Failed to generate timetable' }, { status: 500 });
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    const { conflicts, timetable } = await request.json();
+    const suggestions = await getConflictSuggestions(conflicts, timetable);
+    return NextResponse.json({ suggestions });
+  } catch (error) {
+    console.error('Error getting conflict suggestions:', error);
+    return NextResponse.json({ error: 'Failed to get suggestions' }, { status: 500 });
+  }
+}

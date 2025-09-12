@@ -3,7 +3,7 @@ import { courses as initialCourses } from './data/courses.json';
 import { rooms as initialRooms } from './data/rooms.json';
 import { faculty as initialFaculty, Faculty } from './data/faculty.json';
 import { studentGroups as initialStudentGroups, StudentGroup } from './data/students.json';
-import { ScheduleEntry } from './timetable-generator';
+import { ScheduleEntry } from '@/app/api/timetable/route';
 
 export type Course = (typeof initialCourses)[0];
 export type Room = (typeof initialRooms)[0];

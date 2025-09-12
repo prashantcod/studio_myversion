@@ -3,11 +3,11 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { TimetableView } from "@/components/timetable-view";
-import { generateTimetable } from "@/lib/timetable-generator";
 import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useDataStore } from "@/lib/data-store";
+import { TimetableResult } from "@/app/api/timetable/route";
 
 export default function TimetablePage() {
     const { timetable, setTimetable } = useDataStore();
@@ -15,7 +15,8 @@ export default function TimetablePage() {
 
     const fetchTimetable = async () => {
         setIsLoading(true);
-        const result = await generateTimetable();
+        const response = await fetch('/api/timetable');
+        const result: TimetableResult = await response.json();
         setTimetable(result.timetable);
         setIsLoading(false);
     }
