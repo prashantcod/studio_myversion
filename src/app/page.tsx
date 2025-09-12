@@ -1,3 +1,4 @@
+
 import Image from 'next/image';
 import Link from 'next/link';
 import {
@@ -21,47 +22,47 @@ import {Header} from '@/components/header';
 import {Footer} from '@/components/footer';
 import {placeholderImages} from '@/lib/placeholder-images.json';
 
-export default function Home() {
-  const heroImage = placeholderImages.find(img => img.id === 'hero-image');
-
-  const features = [
+const features = [
     {
-      icon: <Cpu className="size-8 text-primary" />,
+      icon: Cpu,
       title: 'AI-Powered Generation',
       description:
         'Leverage advanced AI to generate conflict-free, optimized timetables in minutes, not weeks.',
     },
     {
-      icon: <BookCopy className="size-8 text-primary" />,
+      icon: BookCopy,
       title: 'NEP 2020 Compliant',
       description:
         'Fully supports Major/Minor courses, credit systems, and multi-disciplinary structures.',
     },
     {
-      icon: <Users className="size-8 text-primary" />,
+      icon: Users,
       title: 'Collaborative Platform',
       description:
         'Dedicated interfaces for administrators, faculty, and students to manage their roles effectively.',
     },
     {
-      icon: <GraduationCap className="size-8 text-primary" />,
+      icon: GraduationCap,
       title: 'Student-Centric',
       description:
         'Empower students with a simple interface to select electives and view their personalized schedules.',
     },
     {
-      icon: <Share2 className="size-8 text-primary" />,
+      icon: Share2,
       title: 'Seamless Integration',
       description:
         'Easily import existing data for courses, faculty, and students to get started quickly.',
     },
     {
-      icon: <ArrowRight className="size-8 text-primary" />,
+      icon: ArrowRight,
       title: 'Dynamic & Flexible',
       description:
         'Simulate scenarios, handle exceptions, and dynamically edit schedules with an intuitive UI.',
     },
   ];
+
+export default function Home() {
+  const heroImage = placeholderImages.find(img => img.id === 'hero-image');
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -128,17 +129,20 @@ export default function Home() {
               </div>
             </div>
             <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 py-12 sm:grid-cols-2 lg:grid-cols-3">
-              {features.map(feature => (
-                <Card key={feature.title} className="flex flex-col">
-                  <CardHeader>
-                    {feature.icon}
-                    <CardTitle>{feature.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <CardDescription>{feature.description}</CardDescription>
-                  </CardContent>
-                </Card>
-              ))}
+              {features.map((feature) => {
+                const Icon = feature.icon;
+                return (
+                    <Card key={feature.title} className="flex flex-col">
+                    <CardHeader>
+                        <Icon className="size-8 text-primary" />
+                        <CardTitle>{feature.title}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <CardDescription>{feature.description}</CardDescription>
+                    </CardContent>
+                    </Card>
+                );
+                })}
             </div>
           </div>
         </section>
