@@ -2,7 +2,7 @@
 'use server';
 
 import { courses } from './data/courses.json';
-import { faculty } from './data/faculty.json';
+import { faculty as facultyData } from './data/faculty.json';
 import { rooms } from './data/rooms.json';
 import { studentGroups } from './data/students.json';
 
@@ -65,7 +65,7 @@ export const generateTimetable = async (): Promise<TimetableResult> => {
         }
 
         // Find a suitable faculty member
-        const suitableFaculty = faculty.find(f => f.expertise.includes(course.code));
+        const suitableFaculty = facultyData.find(f => f.expertise.includes(course.code));
 
         if (!suitableFaculty) {
           conflicts.push(`No faculty with expertise for ${course.code}`);
@@ -128,10 +128,10 @@ export const getConflictSuggestions = async (result: TimetableResult): Promise<s
   // Build a map of currently used slots for faster lookups
   const scheduleTracker: Record<string, boolean> = {};
   for (const entry of timetable) {
-      const faculty = faculty.find(f => f.name === entry.facultyName);
+      const facultyMember = facultyData.find(f => f.name === entry.facultyName);
       const studentGroup = studentGroups.find(sg => sg.name === entry.studentGroup);
       
-      if(faculty) scheduleTracker[`${faculty.id}_${entry.day}_${entry.timeSlot}`] = true;
+      if(facultyMember) scheduleTracker[`${facultyMember.id}_${entry.day}_${entry.timeSlot}`] = true;
       scheduleTracker[`${entry.roomId}_${entry.day}_${entry.timeSlot}`] = true;
       if (studentGroup) scheduleTracker[`${studentGroup.id}_${entry.day}_${entry.timeSlot}`] = true;
   }
@@ -144,7 +144,7 @@ export const getConflictSuggestions = async (result: TimetableResult): Promise<s
       
       const course = courses.find(c => c.code === courseCode);
       const studentGroup = studentGroups.find(sg => sg.name === studentGroupName);
-      const suitableFaculty = faculty.find(f => f.expertise.includes(courseCode));
+      const suitableFaculty = facultyData.find(f => f.expertise.includes(courseCode));
       
       if (!course || !studentGroup || !suitableFaculty) continue;
 
@@ -170,7 +170,11 @@ export const getConflictSuggestions = async (result: TimetableResult): Promise<s
                 break;
             }
         }
-        if (suggestions.length > 0) break; // Break outer loop too
+        if (suggestions.length > 0 && !suggestions.some(s => s.includes(course.name))) { 
+            // continue searching if we found a suggestion for another conflict
+        } else if (suggestions.length > 0) {
+            break;
+        }
       }
     }
   }
