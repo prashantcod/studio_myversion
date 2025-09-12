@@ -1,9 +1,10 @@
 
 'use client';
-
+import * as React from 'react';
 import { ScheduleEntry } from '@/lib/timetable-generator';
 import { cn } from '@/lib/utils';
 import { Badge } from './ui/badge';
+import { ScrollArea } from './ui/scroll-area';
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const TIME_SLOTS_NEW = ['1:00 - 2:30 PM', '2:30 - 4:00 PM', '4:00 - 5:30 PM'];
@@ -19,38 +20,30 @@ const mapTimeToNewSlot = (time: string): string => {
 
 type FormattedSchedule = {
     [timeSlot: string]: {
-        [day: string]: ScheduleEntry | null;
+        [day: string]: ScheduleEntry[];
     };
 };
 
 const formatScheduleForGrid = (schedule: ScheduleEntry[]): FormattedSchedule => {
     const grid: FormattedSchedule = TIME_SLOTS_NEW.reduce((acc, slot) => {
         acc[slot] = DAYS.reduce((dayAcc, day) => {
-            dayAcc[day] = null;
+            dayAcc[day] = [];
             return dayAcc;
-        }, {} as { [day: string]: ScheduleEntry | null });
+        }, {} as { [day: string]: ScheduleEntry[] });
         return acc;
     }, {} as FormattedSchedule);
 
     schedule.forEach(entry => {
         const newSlot = mapTimeToNewSlot(entry.timeSlot);
-        if (grid[newSlot] && grid[newSlot][entry.day] === null) {
-            grid[newSlot][entry.day] = entry;
+        if (grid[newSlot] && grid[newSlot][entry.day]) {
+            grid[newSlot][entry.day].push(entry);
         }
     });
 
     return grid;
 };
 
-const ClassCard = ({ entry }: { entry: ScheduleEntry | null }) => {
-    if (!entry) {
-        return (
-            <div className="flex h-full min-h-[100px] items-center justify-center rounded-lg border-2 border-dashed bg-muted/50 p-2">
-                <span className="text-xs text-muted-foreground">Free</span>
-            </div>
-        );
-    }
-    
+const ClassCard = ({ entry }: { entry: ScheduleEntry }) => {
     const isPractical = entry.courseName.toLowerCase().includes('lab');
 
     return (
@@ -93,7 +86,19 @@ export function TimetableView({ schedule }: { schedule: ScheduleEntry[] }) {
                         </div>
                         {DAYS.map(day => (
                             <div key={`${day}-${timeSlot}`} className="border-b border-r p-1">
-                                <ClassCard entry={gridData[timeSlot][day]} />
+                                {gridData[timeSlot][day].length === 0 ? (
+                                    <div className="flex h-full min-h-[100px] items-center justify-center rounded-lg border-2 border-dashed bg-muted/50 p-2">
+                                        <span className="text-xs text-muted-foreground">Free</span>
+                                    </div>
+                                ) : (
+                                    <ScrollArea className="h-32">
+                                        <div className="space-y-2 pr-2">
+                                            {gridData[timeSlot][day].map((entry, index) => (
+                                                <ClassCard key={index} entry={entry} />
+                                            ))}
+                                        </div>
+                                    </ScrollArea>
+                                )}
                             </div>
                         ))}
                     </React.Fragment>
@@ -102,4 +107,3 @@ export function TimetableView({ schedule }: { schedule: ScheduleEntry[] }) {
         </div>
     );
 }
-
