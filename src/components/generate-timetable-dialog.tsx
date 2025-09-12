@@ -36,6 +36,8 @@ function GenerationSummary({ result }: { result: TimetableResult }) {
   const { toast } = useToast();
 
   const handleSuggestResolutions = async () => {
+    if (result.conflicts.length === 0) return;
+
     setIsSuggesting(true);
     setSuggestions([]);
     try {
@@ -270,5 +272,3 @@ export function GenerateTimetableDialog() {
     </Dialog>
   );
 }
-
-    
