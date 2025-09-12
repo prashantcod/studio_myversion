@@ -1,3 +1,4 @@
+
 'use client';
 import * as React from 'react';
 import {
@@ -22,22 +23,23 @@ import {
     TableHeader,
     TableRow,
   } from '@/components/ui/table';
-import { BookCopy, FileText } from 'lucide-react';
-import { useDataStore, Course } from '@/lib/data-store';
+import { BookCopy } from 'lucide-react';
+import { getCourses, Course } from '@/lib/data-store';
 import { ScrollArea } from './ui/scroll-area';
 import { Badge } from './ui/badge';
 import { Skeleton } from './ui/skeleton';
 
 export function CoursesDialogCard() {
-  const { getCourses } = useDataStore();
   const [allCourses, setAllCourses] = React.useState<Course[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
 
   React.useEffect(() => {
-    const courses = getCourses();
-    setAllCourses(courses);
-    setIsLoading(false);
-  }, [getCourses]);
+    setIsLoading(true);
+    getCourses().then(courses => {
+      setAllCourses(courses);
+      setIsLoading(false);
+    });
+  }, []);
 
   return (
     <Dialog>
@@ -72,7 +74,15 @@ export function CoursesDialogCard() {
                 </TableRow>
             </TableHeader>
             <TableBody>
-                {allCourses.map((course) => (
+                {isLoading ? Array.from({length: 8}).map((_, i) => (
+                    <TableRow key={i}>
+                        <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                        <TableCell><Skeleton className="h-4 w-40" /></TableCell>
+                        <TableCell><Skeleton className="h-4 w-10" /></TableCell>
+                        <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                        <TableCell><Skeleton className="h-4 w-12" /></TableCell>
+                    </TableRow>
+                )) : allCourses.map((course) => (
                 <TableRow key={course.code}>
                     <TableCell className="font-medium">{course.code}</TableCell>
                     <TableCell>{course.name}</TableCell>

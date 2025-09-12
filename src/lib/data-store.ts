@@ -23,8 +23,8 @@ export type Course = (typeof initialCourses)[0];
 export type Room = (typeof initialRooms)[0];
 
 
-export const getCourses = (): Course[] => initialCourses;
-export const getRooms = (): Room[] => initialRooms;
+export const getCourses = async (): Promise<Course[]> => initialCourses;
+export const getRooms = async (): Promise<Room[]> => initialRooms;
 
 export const getFaculty = async (): Promise<Faculty[]> => {
   const facultySnapshot = await firestoreDb.collection('faculty').get();

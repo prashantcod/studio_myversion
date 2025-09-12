@@ -1,7 +1,8 @@
 
 'use server';
 
-import { useDataStore } from './data-store';
+import { getCourses, getFaculty, getRooms, getStudentGroups } from './data-store';
+import { summarizeTimetableConflicts } from '@/ai/flows/summarize-timetable-conflicts';
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
@@ -25,10 +26,10 @@ export const generateTimetable = async (): Promise<TimetableResult> => {
   return new Promise(async resolve => {
     // We wrap the logic in a timeout to simulate network latency
     setTimeout(async () => {
-      const { getCourses, getFaculty, getRooms, getStudentGroups } = useDataStore();
-      const allCourses = getCourses();
+      
+      const allCourses = await getCourses();
       const allFaculty = await getFaculty();
-      const allRooms = getRooms();
+      const allRooms = await getRooms();
       const allStudentGroups = await getStudentGroups();
 
       const timetable: ScheduleEntry[] = [];
@@ -118,10 +119,10 @@ export const generateTimetable = async (): Promise<TimetableResult> => {
 export const getConflictSuggestions = async (conflicts: string[], timetable: ScheduleEntry[]): Promise<string[]> => {
     return new Promise(async resolve => {
         setTimeout(async () => {
-            const { getCourses, getFaculty, getRooms, getStudentGroups } = useDataStore();
-            const allCourses = getCourses();
+            
+            const allCourses = await getCourses();
             const allFaculty = await getFaculty();
-            const allRooms = getRooms();
+            const allRooms = await getRooms();
             const allStudentGroups = await getStudentGroups();
 
             const suggestions: string[] = [];
@@ -198,7 +199,8 @@ export const getConflictSuggestions = async (conflicts: string[], timetable: Sch
                     }
                 }
             }
-            resolve(suggestions);
+            const {summary} = await summarizeTimetableConflicts({conflicts: JSON.stringify(conflicts)});
+            resolve([summary]);
         }, 1000);
     });
 };
