@@ -133,11 +133,11 @@ let dataStore: DataStore = {
         }
     ],
     addFaculty: (faculty) => {
-        const newFaculty = { ...faculty, id: `F${Date.now()}` };
+        const newFaculty = { ...faculty, id: crypto.randomUUID() };
         dataStore.faculty.push(newFaculty);
     },
     addStudentGroup: (group) => {
-        const newGroup = { ...group, id: `SG${Date.now()}` };
+        const newGroup = { ...group, id: crypto.randomUUID() };
         dataStore.studentGroups.push(newGroup);
     },
     addLeaveRequest: (request) => {
