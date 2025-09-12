@@ -1,10 +1,11 @@
+
 'use server';
 
 import { useDataStore } from './data-store';
 import { summarizeTimetableConflicts } from '@/ai/flows/summarize-timetable-conflicts';
 import { isWithinInterval } from 'date-fns';
 
-const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
 export type ScheduleEntry = {
   day: string;

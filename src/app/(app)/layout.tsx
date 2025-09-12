@@ -11,6 +11,7 @@ import {
   ClipboardEdit,
   Calendar,
   Bell,
+  Scale,
 } from 'lucide-react';
 
 import {
@@ -71,19 +72,12 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
               <CoursesDialog />
               <FacultyDialog />
               <StudentDialog />
+              <NepRulesDialog />
             </SidebarGroup>
 
             <SidebarGroup>
               <SidebarGroupLabel>Core</SidebarGroupLabel>
               <GenerateTimetableDialog />
-              <SidebarMenuItem>
-                <SidebarMenuButton href="/timetable" asChild tooltip="View Timetable">
-                  <Link href="/timetable">
-                    <Calendar />
-                    View Timetable
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
               <NotificationsDialog />
             </SidebarGroup>
 
