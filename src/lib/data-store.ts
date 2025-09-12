@@ -57,6 +57,24 @@ let dataStore: DataStore = {
             endDate: new Date(new Date().setDate(new Date().getDate() + 2)),
             reason: 'Attending the International Conference on Computational Theory. I will be unavailable for all scheduled classes during this period.',
             status: 'pending'
+        },
+        {
+            id: 'LR-DEMO-002',
+            facultyId: 'F002',
+            facultyName: 'Dr. Grace Hopper',
+            startDate: new Date(new Date().setDate(new Date().getDate() + 5)),
+            endDate: new Date(new Date().setDate(new Date().getDate() + 6)),
+            reason: 'Personal leave for a family matter. Apologies for the short notice.',
+            status: 'pending'
+        },
+        {
+            id: 'LR-DEMO-003',
+            facultyId: 'F003',
+            facultyName: 'Prof. Ada Lovelace',
+            startDate: new Date(new Date().setDate(new Date().getDate() + 10)),
+            endDate: new Date(new Date().setDate(new Date().getDate() + 15)),
+            reason: 'Taking a pre-approved professional development course.',
+            status: 'pending'
         }
     ],
     notifications: [
@@ -69,6 +87,28 @@ let dataStore: DataStore = {
             timestamp: new Date(),
             payload: {
                 leaveRequestId: 'LR-DEMO-001'
+            }
+        },
+        {
+            id: 'NOTIF-004',
+            type: 'leaveRequest',
+            title: 'New Leave Request',
+            description: 'Dr. Grace Hopper has requested leave.',
+            isRead: false,
+            timestamp: new Date(new Date().getTime() - 60000 * 30), // 30 mins ago
+            payload: {
+                leaveRequestId: 'LR-DEMO-002'
+            }
+        },
+         {
+            id: 'NOTIF-005',
+            type: 'leaveRequest',
+            title: 'New Leave Request',
+            description: 'Prof. Ada Lovelace has requested leave.',
+            isRead: true,
+            timestamp: new Date(new Date().getTime() - 60000 * 60 * 2), // 2 hours ago
+            payload: {
+                leaveRequestId: 'LR-DEMO-003'
             }
         },
         {
