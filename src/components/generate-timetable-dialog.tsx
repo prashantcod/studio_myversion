@@ -22,40 +22,19 @@ import { Alert, AlertDescription } from './ui/alert';
 import { TimetableView } from './timetable-view';
 
 
-function GenerationSummary({ result, onApplySuggestion }: { result: TimetableResult, onApplySuggestion: () => void }) {
-  const [isSuggesting, setIsSuggesting] = React.useState(false);
-  const [suggestions, setSuggestions] = React.useState<string[]>([]);
-  const { toast } = useToast();
-
-  const handleSuggestResolutions = async () => {
-    if (result.conflicts.length === 0) return;
-
-    setIsSuggesting(true);
-    setSuggestions([]);
-    try {
-      // This is now calling our local suggestion engine
-      const response = await getConflictSuggestions(result);
-      
-      if (response && response.length > 0) {
-        setSuggestions(response);
-      } else {
-        // Fallback suggestion if the local engine can't find a simple fix
-        setSuggestions(["No simple resolutions could be found automatically. Consider increasing faculty availability or adding more rooms."]);
-      }
-
-    } catch (error) {
-      console.error('Error suggesting resolutions:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Suggestion Failed',
-        description: 'Could not get suggestions. Please try again.',
-      });
-      // Fallback suggestion
-      setSuggestions(["An error occurred while generating suggestions. Please check the console."]);
-    } finally {
-      setIsSuggesting(false);
-    }
-  };
+function GenerationSummary({ 
+  result, 
+  onApplySuggestion,
+  onSuggestResolutions,
+  isSuggesting,
+  suggestions,
+}: { 
+  result: TimetableResult, 
+  onApplySuggestion: () => void,
+  onSuggestResolutions: () => Promise<void>,
+  isSuggesting: boolean,
+  suggestions: string[]
+}) {
 
   if (result.conflicts.length === 0) {
     return (
@@ -84,7 +63,7 @@ function GenerationSummary({ result, onApplySuggestion }: { result: TimetableRes
            <Button
             size="sm"
             variant="outline"
-            onClick={handleSuggestResolutions}
+            onClick={onSuggestResolutions}
             disabled={isSuggesting}
           >
             {isSuggesting ? (
@@ -133,10 +112,15 @@ export function GenerateTimetableDialog() {
   const [isLoading, setIsLoading] = React.useState(false);
   const [result, setResult] = React.useState<TimetableResult | null>(null);
   const { toast } = useToast();
+  
+  const [isSuggesting, setIsSuggesting] = React.useState(false);
+  const [suggestions, setSuggestions] = React.useState<string[]>([]);
+
 
   const handleGenerate = React.useCallback(async () => {
     setIsLoading(true);
     setResult(null);
+    setSuggestions([]); // Clear previous suggestions
     try {
       // Adding a slight delay to make the "Applying..." state visible
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -158,11 +142,41 @@ export function GenerateTimetableDialog() {
     }
   }, [toast]);
 
+  const handleSuggestResolutions = async () => {
+    if (!result || result.conflicts.length === 0) return;
+
+    setIsSuggesting(true);
+    setSuggestions([]);
+    try {
+      const response = await getConflictSuggestions(result);
+      
+      if (response && response.length > 0) {
+        setSuggestions(response);
+      } else {
+        setSuggestions(["No simple resolutions could be found automatically. Consider increasing faculty availability or adding more rooms."]);
+      }
+
+    } catch (error) {
+      console.error('Error suggesting resolutions:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Suggestion Failed',
+        description: 'Could not get suggestions. Please try again.',
+      });
+      setSuggestions(["An error occurred while generating suggestions. Please check the console."]);
+    } finally {
+      setIsSuggesting(false);
+    }
+  };
+
+
   const onOpenChange = (open: boolean) => {
     setIsOpen(open);
     if (!open) {
       setIsLoading(false);
       setResult(null);
+      setSuggestions([]);
+      setIsSuggesting(false);
     }
   };
 
@@ -224,7 +238,13 @@ export function GenerateTimetableDialog() {
                     )}
                  </div>
                  <div className="lg:col-span-1">
-                    <GenerationSummary result={result} onApplySuggestion={handleGenerate} />
+                    <GenerationSummary 
+                      result={result} 
+                      onApplySuggestion={handleGenerate}
+                      onSuggestResolutions={handleSuggestResolutions}
+                      isSuggesting={isSuggesting}
+                      suggestions={suggestions}
+                    />
                  </div>
               </div>
             </ScrollArea>
