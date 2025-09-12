@@ -18,6 +18,15 @@ import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { ScrollArea } from './ui/scroll-area';
 import { generateTimetable, TimetableResult } from '@/lib/timetable-generator';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+
 
 export function GenerateTimetableDialog() {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -101,17 +110,43 @@ export function GenerateTimetableDialog() {
 
           {result && (
             <ScrollArea className="h-[60vh]">
-              <div className="grid grid-cols-1 gap-6 p-1 md:grid-cols-2">
-                <Card className='md:col-span-2'>
+              <div className="grid grid-cols-1 gap-6 p-1">
+                <Card>
                   <CardHeader className="flex flex-row items-center gap-2">
                     <FileText className="size-5 text-primary" />
                     <CardTitle>Generated Timetable Draft</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <pre className="whitespace-pre-wrap rounded-md bg-muted p-4 text-xs">{JSON.stringify(result.timetable, null, 2)}</pre>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Day</TableHead>
+                          <TableHead>Time Slot</TableHead>
+                          <TableHead>Course</TableHead>
+                          <TableHead>Faculty</TableHead>
+                          <TableHead>Room</TableHead>
+                          <TableHead>Group</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {result.timetable.map((entry, index) => (
+                          <TableRow key={index}>
+                            <TableCell>{entry.day}</TableCell>
+                            <TableCell>{entry.timeSlot}</TableCell>
+                            <TableCell>
+                              <div className="font-medium">{entry.courseCode}</div>
+                              <div className="text-xs text-muted-foreground">{entry.courseName}</div>
+                            </TableCell>
+                            <TableCell>{entry.facultyName}</TableCell>
+                            <TableCell>{entry.roomId}</TableCell>
+                            <TableCell>{entry.studentGroup}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
                   </CardContent>
                 </Card>
-                <div className="space-y-6 md:col-span-2">
+                <div className="space-y-6">
                   <Card>
                     <CardHeader className="flex flex-row items-center gap-2">
                       <AlertTriangle className="size-5 text-destructive" />
