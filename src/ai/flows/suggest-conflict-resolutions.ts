@@ -46,12 +46,25 @@ const suggestConflictResolutionsPrompt = ai.definePrompt({
   name: 'suggestConflictResolutionsPrompt',
   input: {schema: SuggestConflictResolutionsInputSchema},
   output: {schema: SuggestConflictResolutionsOutputSchema},
-  prompt: `You are an expert timetable scheduler. Given the following scheduling conflict, suggest several potential resolutions. Be specific and consider various options like moving courses, reassigning faculty, or using different rooms. Provide each resolution in a detailed sentence.
+  prompt: `You are an expert university timetable troubleshooter. Your task is to analyze a list of scheduling conflicts and the current draft of the timetable to provide specific, actionable resolutions.
 
-Conflict Description: {{{conflictDescription}}}
+Analyze the provided conflict description and the timetable snapshot to understand the root cause of each conflict (e.g., faculty double-booked, room unavailable, student group clash).
+
+Based on your analysis, provide a list of concrete, actionable suggestions. Each suggestion should be a clear instruction that an administrator could follow.
+
+Examples of good suggestions:
+- "Move the 'Data Structures Lab (CSE201L)' for 'Computer Science - 2nd Year' to Friday at 14:00-15:00 in LAB02, as both the lab and the student group are free."
+- "Assign 'Prof. Ada Lovelace' to 'Basic Electronics (ECE101)' on Wednesday at 11:00-12:00, which is currently an unassigned lecture for that group."
+- "Swap the 'Thermodynamics (MECH210)' class on Monday with the 'Intro to Programming (CSE101)' class on Tuesday to resolve the faculty availability issue for Dr. Alan Turing."
+
+Do not provide generic advice like "find another room" or "reschedule the class".
+
+Conflict Description:
+{{{conflictDescription}}}
 
 {{#if timetableSnapshot}}
-Current Timetable Snapshot: {{{timetableSnapshot}}}
+Current Successfully Scheduled Timetable (for context):
+{{{timetableSnapshot}}}
 {{/if}}
 `,
 });
