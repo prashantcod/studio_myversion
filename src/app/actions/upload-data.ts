@@ -38,6 +38,7 @@ export async function uploadDataAction(fileContent: string): Promise<{ success: 
 
         let teachersAdded = 0;
         let studentsAdded = 0;
+        let unknownRows = 0;
 
         for (const item of jsonData) {
             const lowerCaseKeys = Object.keys(item).reduce((acc, key) => {
@@ -56,18 +57,21 @@ export async function uploadDataAction(fileContent: string): Promise<{ success: 
             const hasSize = 'size' in lowerCaseKeys || 'groupsize' in lowerCaseKeys;
             const hasCourses = 'courses' in lowerCaseKeys || 'subjects' in lowerCaseKeys;
             
-            if (!hasName) continue; // Skip rows without a name
+            if (!hasName) {
+                unknownRows++;
+                continue; // Skip rows without a name
+            }
 
-            if (hasExpertise || hasAvailability) { // Likely a teacher
+            if (hasExpertise) { // Treat as a teacher if 'expertise' or 'skills' is present
                 const expertiseValue = lowerCaseKeys.expertise || lowerCaseKeys.skills || '';
                 const availabilityValue = lowerCaseKeys.availability;
                 let availabilityObject = { Monday: [], Tuesday: [], Wednesday: [], Thursday: [], Friday: [] };
                 try {
-                    // Handle availability as a JSON string
-                    if (availabilityValue) {
-                         const parsed = JSON.parse(availabilityValue.replace(/'/g, '"')); // Allow single quotes
+                    // Handle availability as a JSON string, allowing single quotes
+                    if (availabilityValue && availabilityValue.trim().startsWith('{')) {
+                         const parsed = JSON.parse(availabilityValue.replace(/'/g, '"')); 
                          if (typeof parsed === 'object') {
-                            availabilityObject = parsed;
+                            availabilityObject = { ...availabilityObject, ...parsed };
                          }
                     }
                 } catch {
@@ -80,19 +84,23 @@ export async function uploadDataAction(fileContent: string): Promise<{ success: 
                     availability: availabilityObject,
                 });
                 teachersAdded++;
-            } else if (hasSize && hasCourses) { // Likely a student group
+
+            } else if (hasSize && hasCourses) { // Treat as a student group if 'size' and 'courses' are present
                  const coursesValue = lowerCaseKeys.courses || lowerCaseKeys.subjects || '';
+                 const sizeValue = lowerCaseKeys.size || lowerCaseKeys.groupsize || '0';
                  dataStore.addStudentGroup({
                     name: lowerCaseKeys.name,
-                    size: lowerCaseKeys.size ? parseInt(lowerCaseKeys.size, 10) : 0,
+                    size: parseInt(sizeValue, 10) || 0,
                     courses: coursesValue ? coursesValue.split(';').map(c => c.trim()) : [],
                 });
                 studentsAdded++;
+            } else {
+                unknownRows++;
             }
         }
         
         if (teachersAdded === 0 && studentsAdded === 0) {
-            return { success: false, message: 'No valid teacher or student data found. Check CSV headers (e.g., name, expertise, size, courses).' };
+            return { success: false, message: `No valid data found. Processed ${unknownRows} rows without recognized headers (e.g., name, expertise/skills, size, courses).` };
         }
 
         // Revalidate the entire layout to ensure all components using the data store are updated.
