@@ -16,22 +16,21 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { SidebarMenuButton, SidebarMenuItem } from './ui/sidebar';
 import { placeholderImages } from '@/lib/placeholder-images.json';
 import { Badge } from './ui/badge';
-import { Separator } from './ui/separator';
+import { useDataStore } from '@/lib/data-store';
 
-const facultyData = [
-  { id: 1, name: 'Suresh Kumar', initials: 'SK', credits: 16, module: 'Advanced AI', leaveDays: 3, documents: [{ name: 'PhD_Thesis.pdf' }, { name: 'Joining_Report.pdf' }] },
-  { id: 2, name: 'Basha', initials: 'B', credits: 14, module: 'Data Structures', leaveDays: 1, documents: [] },
-  { id: 3, name: 'Swapna', initials: 'S', credits: 15, module: 'Web Development', leaveDays: 5, documents: [{ name: 'Conference_Paper.pdf' }] },
-  { id: 4, name: 'Ambika', initials: 'A', credits: 12, module: 'Database Systems', leaveDays: 2, documents: [] },
-  { id: 5, name: 'Maruthi', initials: 'M', credits: 18, module: 'Machine Learning', leaveDays: 0, documents: [{ name: 'Research_Proposal.pdf' }] },
-  { id: 6, name: 'Jyanath', initials: 'J', credits: 14, module: 'Operating Systems', leaveDays: 4, documents: [] },
-];
+type Faculty = ReturnType<typeof useDataStore>['faculty'][0];
+
+const getInitials = (name: string) => {
+    return name.split(' ').map(n => n[0]).join('');
+}
 
 export function FacultyDialog() {
-  const [selectedFaculty, setSelectedFaculty] = React.useState<typeof facultyData[0] | null>(null);
+  const [selectedFaculty, setSelectedFaculty] = React.useState<Faculty | null>(null);
   const teacherAvatar = placeholderImages.find(img => img.id === 'user-avatar');
+  const { getFaculty } = useDataStore();
+  const facultyData = getFaculty();
 
-  const handleFacultySelect = (faculty: typeof facultyData[0]) => {
+  const handleFacultySelect = (faculty: Faculty) => {
     setSelectedFaculty(faculty);
   };
 
@@ -60,12 +59,12 @@ export function FacultyDialog() {
             </div>
           ) : (
             <>
-              <DialogTitle>Faculty Names</DialogTitle>
+              <DialogTitle>Faculty Members</DialogTitle>
               <DialogDescription>Select a faculty member to view their details.</DialogDescription>
             </>
           )}
         </DialogHeader>
-        <div className="py-4">
+        <div className="py-4 min-h-[300px]">
           {selectedFaculty ? (
             <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
               <div className="md:col-span-1">
@@ -73,10 +72,10 @@ export function FacultyDialog() {
                   <CardHeader className="items-center text-center">
                     <Avatar className="size-24">
                       {teacherAvatar && <AvatarImage src={teacherAvatar.imageUrl} data-ai-hint="teacher profile photo" />}
-                      <AvatarFallback className="text-3xl">{selectedFaculty.initials}</AvatarFallback>
+                      <AvatarFallback className="text-3xl">{getInitials(selectedFaculty.name)}</AvatarFallback>
                     </Avatar>
                     <CardTitle className="pt-2">{selectedFaculty.name}</CardTitle>
-                    <CardDescription>{selectedFaculty.module} Module Lead</CardDescription>
+                    <CardDescription>Expertise: {selectedFaculty.expertise.join(', ')}</CardDescription>
                   </CardHeader>
                 </Card>
               </div>
@@ -89,49 +88,17 @@ export function FacultyDialog() {
                     <div className="flex items-center justify-between">
                        <div className="flex items-center gap-2">
                         <Clock className="size-5 text-muted-foreground" />
-                        <span className="font-medium">Credit Hours (NEP)</span>
+                        <span className="font-medium">Total Availability Slots</span>
                       </div>
-                      <Badge variant="secondary">{selectedFaculty.credits} / 20</Badge>
+                      <Badge variant="secondary">{Object.values(selectedFaculty.availability).flat().length} slots</Badge>
                     </div>
                      <div className="flex items-center justify-between">
                        <div className="flex items-center gap-2">
                         <BookOpen className="size-5 text-muted-foreground" />
-                        <span className="font-medium">Current Module</span>
+                        <span className="font-medium">Expert In</span>
                       </div>
-                      <span className="text-muted-foreground">{selectedFaculty.module}</span>
+                      <span className="text-muted-foreground">{selectedFaculty.expertise.length} courses</span>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <CalendarOff className="size-5 text-muted-foreground" />
-                        <span className="font-medium">Leave Days (Semester)</span>
-                      </div>
-                      <Badge variant="destructive">{selectedFaculty.leaveDays} days</Badge>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card className="mt-6">
-                   <CardHeader>
-                    <CardTitle>Submitted Documents</CardTitle>
-                    <CardDescription>Documents personally submitted to the admin.</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    {selectedFaculty.documents.length > 0 ? (
-                      <ul className="space-y-2">
-                        {selectedFaculty.documents.map(doc => (
-                          <li key={doc.name} className="flex items-center justify-between">
-                            <div className='flex items-center gap-2'>
-                              <FileText className="size-4 text-muted-foreground" />
-                              <span>{doc.name}</span>
-                            </div>
-                            <Button variant="ghost" size="icon">
-                              <Download className="size-4" />
-                            </Button>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="text-sm text-muted-foreground">No documents submitted.</p>
-                    )}
                   </CardContent>
                 </Card>
               </div>
@@ -143,11 +110,11 @@ export function FacultyDialog() {
                   <CardContent className="flex items-center gap-4 p-4">
                     <Avatar>
                       {teacherAvatar && <AvatarImage src={teacherAvatar.imageUrl} data-ai-hint="teacher profile photo" />}
-                      <AvatarFallback>{faculty.initials}</AvatarFallback>
+                      <AvatarFallback>{getInitials(faculty.name)}</AvatarFallback>
                     </Avatar>
                     <div>
                       <p className="font-semibold">{faculty.name}</p>
-                      <p className="text-sm text-muted-foreground">{faculty.module}</p>
+                      <p className="text-sm text-muted-foreground">{faculty.expertise.join(', ')}</p>
                     </div>
                   </CardContent>
                 </Card>

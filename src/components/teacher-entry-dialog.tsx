@@ -14,8 +14,26 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useDataStore } from '@/lib/data-store';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export function TeacherEntryDialog() {
+    const { addFaculty } = useDataStore();
+    const router = useRouter();
+    const [name, setName] = useState('');
+    const [expertise, setExpertise] = useState('');
+
+    const handleSubmit = () => {
+        addFaculty({
+            name,
+            expertise: expertise.split(',').map(e => e.trim()),
+            // Default availability, can be edited later
+            availability: { Monday: [], Tuesday: [], Wednesday: [], Thursday: [], Friday: [] }
+        });
+        router.refresh();
+    }
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -36,35 +54,17 @@ export function TeacherEntryDialog() {
             <Label htmlFor="name" className="text-right">
               Name
             </Label>
-            <Input id="name" placeholder="e.g. Dr. Jane Doe" className="col-span-3" />
+            <Input id="name" placeholder="e.g. Dr. Jane Doe" className="col-span-3" value={name} onChange={e => setName(e.target.value)} />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="email" className="text-right">
-              Email
+            <Label htmlFor="expertise" className="text-right">
+              Expertise
             </Label>
-            <Input id="email" type="email" placeholder="e.g. jane.doe@university.edu" className="col-span-3" />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="phone" className="text-right">
-              Phone
-            </Label>
-            <Input id="phone" placeholder="e.g. +1 234 567 890" className="col-span-3" />
-          </div>
-           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="qualification" className="text-right">
-              Qualification
-            </Label>
-            <Input id="qualification" placeholder="e.g. Ph.D. in AI" className="col-span-3" />
-          </div>
-           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="experience" className="text-right">
-              Experience
-            </Label>
-            <Input id="experience" placeholder="e.g. 10 years" className="col-span-3" />
+            <Input id="expertise" placeholder="e.g. CSE101,PHY101" className="col-span-3" value={expertise} onChange={e => setExpertise(e.target.value)} />
           </div>
         </div>
         <DialogFooter>
-          <Button type="submit">Save Teacher</Button>
+          <Button type="submit" onClick={handleSubmit}>Save Teacher</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -1,16 +1,9 @@
 
 'use server';
 
-import { courses as allCourses } from './data/courses.json';
-import { faculty as allFaculty } from './data/faculty.json';
-import { rooms as allRooms } from './data/rooms.json';
-import { studentGroups as allStudentGroups } from './data/students.json';
+import { useDataStore } from './data-store';
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
-const TIME_SLOTS = [
-  '09:00-10:00', '10:00-11:00', '11:00-12:00', '12:00-13:00',
-  '14:00-15:00', '15:00-16:00', '16:00-17:00'
-];
 
 export type ScheduleEntry = {
   day: string;
@@ -32,10 +25,15 @@ export const generateTimetable = async (): Promise<TimetableResult> => {
   return new Promise(resolve => {
     // We wrap the logic in a timeout to simulate network latency
     setTimeout(() => {
+      const { getCourses, getFaculty, getRooms, getStudentGroups } = useDataStore();
+      const allCourses = getCourses();
+      const allFaculty = getFaculty();
+      const allRooms = getRooms();
+      const allStudentGroups = getStudentGroups();
+
       const timetable: ScheduleEntry[] = [];
       const conflicts: string[] = [];
       
-      // Keep track of scheduled resources { resourceId_day_timeSlot: true }
       const scheduleTracker: Record<string, boolean> = {};
 
       const allCoursesToSchedule = allStudentGroups.flatMap(group => 
@@ -53,7 +51,6 @@ export const generateTimetable = async (): Promise<TimetableResult> => {
 
         let scheduled = false;
         
-        // Find a suitable room
         const suitableRoom = allRooms.find(r => 
           (course.type === 'Practical' ? r.type === 'Lab' : r.type === 'Classroom') &&
           r.capacity >= studentGroup.size
@@ -64,7 +61,6 @@ export const generateTimetable = async (): Promise<TimetableResult> => {
           continue;
         }
 
-        // Find a suitable faculty member
         const suitableFaculty = allFaculty.find(f => f.expertise.includes(course.code));
 
         if (!suitableFaculty) {
@@ -72,7 +68,6 @@ export const generateTimetable = async (): Promise<TimetableResult> => {
           continue;
         }
 
-        // Find an available slot
         for (const day of DAYS) {
           if (scheduled) break;
           
@@ -84,7 +79,6 @@ export const generateTimetable = async (): Promise<TimetableResult> => {
             const studentGroupSlotKey = `${studentGroup.id}_${day}_${timeSlot}`;
             
             if (!scheduleTracker[facultySlotKey] && !scheduleTracker[roomSlotKey] && !scheduleTracker[studentGroupSlotKey]) {
-              // Slot is free for all, schedule it.
               const newEntry: ScheduleEntry = {
                 day,
                 timeSlot,
@@ -97,7 +91,6 @@ export const generateTimetable = async (): Promise<TimetableResult> => {
               
               timetable.push(newEntry);
               
-              // Mark resources as booked
               scheduleTracker[facultySlotKey] = true;
               scheduleTracker[roomSlotKey] = true;
               scheduleTracker[studentGroupSlotKey] = true;
@@ -114,7 +107,7 @@ export const generateTimetable = async (): Promise<TimetableResult> => {
       }
 
       resolve({ timetable, conflicts });
-    }, 1500); // Simulate 1.5 seconds of processing time
+    }, 1500);
   });
 };
 
@@ -125,10 +118,15 @@ export const generateTimetable = async (): Promise<TimetableResult> => {
 export const getConflictSuggestions = async (conflicts: string[], timetable: ScheduleEntry[]): Promise<string[]> => {
     return new Promise(resolve => {
         setTimeout(() => {
+            const { getCourses, getFaculty, getRooms, getStudentGroups } = useDataStore();
+            const allCourses = getCourses();
+            const allFaculty = getFaculty();
+            const allRooms = getRooms();
+            const allStudentGroups = getStudentGroups();
+
             const suggestions: string[] = [];
             const suggestedFor = new Set<string>();
 
-            // Build a tracker of currently used slots from the generated timetable
             const scheduleTracker: Record<string, boolean> = {};
             for (const entry of timetable) {
                 const facultyMember = allFaculty.find(f => f.name === entry.facultyName);
@@ -139,52 +137,68 @@ export const getConflictSuggestions = async (conflicts: string[], timetable: Sch
             }
 
             for (const conflict of conflicts) {
-                // Example conflict: "Could not find any available slot for CSE101 for group Computer Science - 1st Year"
-                const match = conflict.match(/Could not find any available slot for (.*) for group (.*)/);
-                if (!match) continue;
-
-                const courseCode = match[1];
-                const studentGroupName = match[2];
-                const conflictKey = `${courseCode}-${studentGroupName}`;
-
-                if (suggestedFor.has(conflictKey)) continue;
-
-                const course = allCourses.find(c => c.code === courseCode);
-                const studentGroup = allStudentGroups.find(sg => sg.name === studentGroupName);
-                if (!course || !studentGroup) continue;
-                
-                const suitableFaculty = allFaculty.find(f => f.expertise.includes(course.code));
-                const suitableRoom = allRooms.find(r =>
-                    (course.type === 'Practical' ? r.type === 'Lab' : r.type === 'Classroom') &&
-                    r.capacity >= studentGroup.size
-                );
-
-                if (!suitableFaculty || !suitableRoom) continue;
-
                 let suggestionFound = false;
-                for (const day of DAYS) {
-                    if (suggestionFound) break;
-                    
-                    // Check against faculty's general availability
-                    const facultyAvailableSlots = suitableFaculty.availability[day as keyof typeof suitableFaculty.availability] || [];
 
-                    for (const timeSlot of facultyAvailableSlots) {
-                         // Check against the current schedule tracker
-                        const facultySlotKey = `${suitableFaculty.id}_${day}_${timeSlot}`;
-                        const roomSlotKey = `${suitableRoom.id}_${day}_${timeSlot}`;
-                        const studentGroupSlotKey = `${studentGroup.id}_${day}_${timeSlot}`;
-
-                        if (!scheduleTracker[facultySlotKey] && !scheduleTracker[roomSlotKey] && !scheduleTracker[studentGroupSlotKey]) {
-                            // Found a free slot for everyone
-                            suggestions.push(`Move '${course.name}' for '${studentGroup.name}' to ${day} at ${timeSlot} in ${suitableRoom.id}.`);
-                            suggestedFor.add(conflictKey);
+                // Handle "No suitable room" conflict
+                const roomConflictMatch = conflict.match(/No suitable room found for (.*) \(Group: (.*), Size: (\d+)\)/);
+                if (roomConflictMatch && !suggestionFound) {
+                    const [, courseCode, groupName, groupSize] = roomConflictMatch;
+                    const course = allCourses.find(c => c.code === courseCode);
+                    if (course) {
+                        const roomType = course.type === 'Practical' ? 'Lab' : 'Classroom';
+                        const availableRooms = allRooms.filter(r => r.type === roomType);
+                        const largestRoom = availableRooms.reduce((max, room) => room.capacity > max.capacity ? room : max, {capacity: 0});
+                        
+                        if (largestRoom.capacity > 0 && Number(groupSize) > largestRoom.capacity) {
+                            suggestions.push(`Increase capacity of a ${roomType} or split group '${groupName}'. Largest ${roomType} has capacity ${largestRoom.capacity}, but group size is ${groupSize}.`);
+                            suggestedFor.add(conflict);
                             suggestionFound = true;
-                            break;
+                        }
+                    }
+                }
+
+
+                // Handle "Could not find any available slot" conflict
+                const slotConflictMatch = conflict.match(/Could not find any available slot for (.*) for group (.*)/);
+                if (slotConflictMatch && !suggestionFound) {
+                    const [, courseCode, studentGroupName] = slotConflictMatch;
+                    const conflictKey = `${courseCode}-${studentGroupName}`;
+
+                    if (suggestedFor.has(conflictKey)) continue;
+
+                    const course = allCourses.find(c => c.code === courseCode);
+                    const studentGroup = allStudentGroups.find(sg => sg.name === studentGroupName);
+                    if (!course || !studentGroup) continue;
+                    
+                    const suitableFaculty = allFaculty.find(f => f.expertise.includes(course.code));
+                    const suitableRoom = allRooms.find(r =>
+                        (course.type === 'Practical' ? r.type === 'Lab' : r.type === 'Classroom') &&
+                        r.capacity >= studentGroup.size
+                    );
+
+                    if (!suitableFaculty || !suitableRoom) continue;
+
+                    for (const day of DAYS) {
+                        if (suggestionFound) break;
+                        
+                        const facultyAvailableSlots = suitableFaculty.availability[day as keyof typeof suitableFaculty.availability] || [];
+
+                        for (const timeSlot of facultyAvailableSlots) {
+                            const facultySlotKey = `${suitableFaculty.id}_${day}_${timeSlot}`;
+                            const roomSlotKey = `${suitableRoom.id}_${day}_${timeSlot}`;
+                            const studentGroupSlotKey = `${studentGroup.id}_${day}_${timeSlot}`;
+
+                            if (!scheduleTracker[facultySlotKey] && !scheduleTracker[roomSlotKey] && !scheduleTracker[studentGroupSlotKey]) {
+                                suggestions.push(`Move '${course.name}' for '${studentGroup.name}' to ${day} at ${timeSlot} in ${suitableRoom.id}.`);
+                                suggestedFor.add(conflictKey);
+                                suggestionFound = true;
+                                break;
+                            }
                         }
                     }
                 }
             }
             resolve(suggestions);
-        }, 1000); // Simulate backend processing
+        }, 1000);
     });
 };

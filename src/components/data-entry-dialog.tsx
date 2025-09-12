@@ -11,7 +11,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
-import { ClipboardEdit, FileUp, Files, PenSquare } from 'lucide-react';
+import { ClipboardEdit, Files, PenSquare } from 'lucide-react';
 import { StudentEntryDialog } from './student-entry-dialog';
 import { TeacherEntryDialog } from './teacher-entry-dialog';
 import { FileUploadDialog } from './file-upload-dialog';
@@ -61,10 +61,6 @@ export function DataEntryDialog() {
         </DialogHeader>
         <div className="flex flex-col gap-4 py-4">
           <FileUploadDialog />
-          <Button variant="outline" className="justify-start" disabled>
-            <Files className="mr-2" />
-            Upload Multiple Files (Coming Soon)
-          </Button>
           <ManualEntryDialog />
         </div>
       </DialogContent>
