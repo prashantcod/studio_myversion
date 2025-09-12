@@ -41,16 +41,12 @@ export default function StudentLoginPage() {
             return;
         }
 
-        // In a real app, you'd have a proper user authentication system.
-        // Here, we'll find a student based on their name, which we can derive from the email for demo purposes.
-        const nameFromEmail = loginEmail.split('@')[0].replace('.', ' ').replace(/\b\w/g, l => l.toUpperCase());
-
         let foundStudent = null;
         let foundGroup = null;
 
         for (const group of studentGroups) {
             if (group.students) {
-                const student = group.students.find(s => s.name.toLowerCase() === nameFromEmail.toLowerCase());
+                const student = group.students.find(s => s.email?.toLowerCase() === loginEmail.toLowerCase());
                 if (student) {
                     foundStudent = student;
                     foundGroup = group;
@@ -82,6 +78,7 @@ export default function StudentLoginPage() {
             const newStudent = {
                 name: registerName,
                 rollNumber: registerRollNumber,
+                email: registerEmail,
             };
 
             // Add student to the first group for demo purposes

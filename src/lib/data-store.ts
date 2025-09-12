@@ -66,7 +66,14 @@ let dataStore: DataStore = {
     courses: initialCourses,
     rooms: initialRooms,
     faculty: [...initialFaculty],
-    studentGroups: [...initialStudentGroups],
+    studentGroups: [...initialStudentGroups].map(group => ({
+        ...group,
+        students: group.students?.map(student => ({
+            ...student,
+            // Add a mock email to existing students for login to work
+            email: `${student.name.toLowerCase().replace(/\s/g, '.')}@university.edu`
+        }))
+    })),
     timetable: [],
     loggedInStudent: null,
     recentGenerations: [
