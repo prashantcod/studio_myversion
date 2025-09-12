@@ -11,31 +11,61 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogClose,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useDataStore } from '@/lib/data-store';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
 
 export function TeacherEntryDialog() {
     const { addFaculty } = useDataStore();
     const router = useRouter();
     const [name, setName] = useState('');
     const [expertise, setExpertise] = useState('');
+    const [isOpen, setIsOpen] = useState(false);
+    const { toast } = useToast();
 
     const handleSubmit = () => {
+        if (!name || !expertise) {
+            toast({
+                variant: 'destructive',
+                title: 'Missing Information',
+                description: 'Please fill out all fields.',
+            });
+            return;
+        }
+
         addFaculty({
             name,
             expertise: expertise.split(',').map(e => e.trim()),
             // Default availability, can be edited later
             availability: { Monday: [], Tuesday: [], Wednesday: [], Thursday: [], Friday: [] }
         });
+        
+        toast({
+            title: 'Teacher Added',
+            description: `${name} has been added to the faculty.`,
+        });
+
         router.refresh();
+        setName('');
+        setExpertise('');
+        setIsOpen(false);
+    }
+
+    const onOpenChange = (open: boolean) => {
+        setIsOpen(open);
+        if(!open) {
+            setName('');
+            setExpertise('');
+        }
     }
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
         <Button variant="outline" className="justify-start">
           <UserPlus className="mr-2" />
@@ -64,6 +94,9 @@ export function TeacherEntryDialog() {
           </div>
         </div>
         <DialogFooter>
+            <DialogClose asChild>
+                <Button variant="ghost">Cancel</Button>
+            </DialogClose>
           <Button type="submit" onClick={handleSubmit}>Save Teacher</Button>
         </DialogFooter>
       </DialogContent>
