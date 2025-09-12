@@ -123,8 +123,8 @@ export default function DashboardPage() {
                     </TableCell>
                     <TableCell className="text-right">{gen.conflicts}</TableCell>
                     <TableCell className="text-right">
-                      <Button variant="outline" size="sm">
-                        View
+                      <Button asChild variant="outline" size="sm">
+                        <Link href="/timetable">View</Link>
                       </Button>
                     </TableCell>
                   </TableRow>
