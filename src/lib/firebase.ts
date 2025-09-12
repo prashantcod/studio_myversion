@@ -1,6 +1,7 @@
+'use server';
 import * as admin from 'firebase-admin';
 
-let db: admin.firestore.Firestore | null = null;
+let db: admin.firestore.Firestore;
 
 if (!admin.apps.length) {
   try {
@@ -13,6 +14,7 @@ if (!admin.apps.length) {
 
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),
+      databaseURL: process.env.FIREBASE_DATABASE_URL,
     });
     
     db = admin.firestore();
@@ -28,6 +30,7 @@ if (!admin.apps.length) {
 * 2. Click "Generate new private key".
 * 3. Copy the entire content of the downloaded JSON file.
 * 4. Paste it into the GOOGLE_APPLICATION_CREDENTIALS variable in the .env file.
+* 5. Add your database URL to the FIREBASE_DATABASE_URL variable in the .env file.
 *
 * Error details: ${(error as Error).message}
 ***********************************************************************`
@@ -39,4 +42,4 @@ if (!admin.apps.length) {
 
 // Export a firestore instance that may be null if initialization failed.
 // Data store functions will need to handle this null case.
-export const firestoreDb = db;
+export const firestoreDb = db!;
