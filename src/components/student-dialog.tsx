@@ -14,8 +14,55 @@ import { Card, CardContent } from '@/components/ui/card';
 import { GraduationCap, Users, ChevronLeft, BookOpen } from 'lucide-react';
 import { SidebarMenuButton, SidebarMenuItem } from './ui/sidebar';
 import { useDataStore } from '@/lib/data-store';
-import { StudentGroup } from '@/lib/data/students.json';
+import { StudentGroup, Student } from '@/lib/data/students.json';
 import { Badge } from './ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
+import { ScrollArea } from './ui/scroll-area';
+
+const StudentDetailView = ({ group }: { group: StudentGroup }) => {
+    return (
+        <Card>
+            <CardContent className="p-6 space-y-4">
+                 <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <Users className="size-5 text-muted-foreground" />
+                        <span className="font-medium">Group Size</span>
+                    </div>
+                    <Badge variant="secondary">{group.size} students</Badge>
+                </div>
+                 <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <BookOpen className="size-5 text-muted-foreground" />
+                        <span className="font-medium">Courses Enrolled</span>
+                    </div>
+                    <span className="text-muted-foreground">{group.courses.length} courses</span>
+                </div>
+                <div className="space-y-2 pt-2">
+                    <h4 className="font-medium">Student Roster</h4>
+                     <ScrollArea className="h-64 rounded-md border">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Roll Number</TableHead>
+                                    <TableHead>Name</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {group.students?.map((student: Student) => (
+                                    <TableRow key={student.rollNumber}>
+                                        <TableCell className="font-medium">{student.rollNumber}</TableCell>
+                                        <TableCell>{student.name}</TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </ScrollArea>
+                </div>
+            </CardContent>
+        </Card>
+    );
+};
+
 
 export function StudentDialog() {
   const [selectedGroup, setSelectedGroup] = React.useState<StudentGroup | null>(null);
@@ -63,32 +110,7 @@ export function StudentDialog() {
         </DialogHeader>
         <div className="py-4 min-h-[300px]">
           {selectedGroup ? (
-            <Card>
-              <CardContent className="p-6 space-y-4">
-                 <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <Users className="size-5 text-muted-foreground" />
-                        <span className="font-medium">Group Size</span>
-                    </div>
-                    <Badge variant="secondary">{selectedGroup.size} students</Badge>
-                </div>
-                 <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <BookOpen className="size-5 text-muted-foreground" />
-                        <span className="font-medium">Courses Enrolled</span>
-                    </div>
-                    <span className="text-muted-foreground">{selectedGroup.courses.length} courses</span>
-                </div>
-                <div className="space-y-2 pt-2">
-                    <h4 className="font-medium">Course Codes</h4>
-                    <div className="flex flex-wrap gap-2">
-                        {selectedGroup.courses.map(course => (
-                            <Badge key={course} variant="outline">{course}</Badge>
-                        ))}
-                    </div>
-                </div>
-              </CardContent>
-            </Card>
+            <StudentDetailView group={selectedGroup} />
           ) : (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {studentGroups.map(group => (
