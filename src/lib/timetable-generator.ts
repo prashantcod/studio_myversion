@@ -139,7 +139,7 @@ export const getConflictSuggestions = async (result: TimetableResult): Promise<s
 
   for (const conflict of conflicts) {
     if (suggestedConflicts.has(conflict)) {
-        continue; // Already found a suggestion for this exact conflict
+        continue;
     }
 
     const match = conflict.match(/Could not find any available slot for (.*) for group (.*)/);
@@ -160,16 +160,22 @@ export const getConflictSuggestions = async (result: TimetableResult): Promise<s
       if (!suitableRoom) continue;
 
       let suggestionFound = false;
-      // Strategy 1: Find a completely empty slot for everyone involved.
+      // Strategy: Find a free slot considering faculty's general availability and current schedule bookings.
       for (const day of DAYS) {
-        for (const timeSlot of TIME_SLOTS) {
+        // Get all possible slots for the faculty on this day
+        const facultyDayAvailability = suitableFaculty.availability[day as keyof typeof suitableFaculty.availability] || [];
+
+        for (const timeSlot of facultyDayAvailability) {
             const facultySlotKey = `${suitableFaculty.id}_${day}_${timeSlot}`;
             const roomSlotKey = `${suitableRoom.id}_${day}_${timeSlot}`;
             const studentGroupSlotKey = `${studentGroup.id}_${day}_${timeSlot}`;
 
+            // Check if this generally available slot is also free in the current partial schedule
             if (!scheduleTracker[facultySlotKey] && !scheduleTracker[roomSlotKey] && !scheduleTracker[studentGroupSlotKey]) {
-                const suggestion = `Move the '${course.name}' for '${studentGroup.name}' to ${day} at ${timeSlot} in ${suitableRoom.id}.`;
-                suggestions.push(suggestion);
+                const suggestion = `Move '${course.name}' for '${studentGroup.name}' to ${day} at ${timeSlot} in ${suitableRoom.id}.`;
+                if (!suggestions.includes(suggestion)) {
+                    suggestions.push(suggestion);
+                }
                 suggestedConflicts.add(conflict);
                 suggestionFound = true;
                 break; // Stop after finding one suggestion for this conflict
