@@ -1,53 +1,67 @@
 
-import { courses } from './data/courses.json';
-import { faculty as initialFaculty } from './data/faculty.json';
-import { rooms } from './data/rooms.json';
-import { studentGroups as initialStudentGroups } from './data/students.json';
+import { firestoreDb } from './firebase';
+import { courses as initialCourses } from './data/courses.json';
+import { rooms as initialRooms } from './data/rooms.json';
 
-// This is a simplified in-memory "database" for demonstration purposes.
-// In a real application, you would use a proper database like Firestore or PostgreSQL.
+// This data store now interacts directly with your Firestore database.
 
-type Faculty = typeof initialFaculty[0];
-type StudentGroup = typeof initialStudentGroups[0];
-
-interface DataStore {
-    faculty: Faculty[];
-    studentGroups: StudentGroup[];
-    getCourses: () => typeof courses;
-    getRooms: () => typeof rooms;
-    getFaculty: () => Faculty[];
-    getStudentGroups: () => StudentGroup[];
-    addFaculty: (facultyMember: Partial<Omit<Faculty, 'id'>>) => void;
-    addStudentGroup: (studentGroup: Partial<Omit<StudentGroup, 'id'>>) => void;
-}
-
-const dataStore: DataStore = {
-    faculty: [...initialFaculty],
-    studentGroups: [...initialStudentGroups],
-    getCourses: () => courses,
-    getRooms: () => rooms,
-    getFaculty: () => dataStore.faculty,
-    getStudentGroups: () => dataStore.studentGroups,
-    addFaculty: (facultyMember) => {
-        const newId = `F${(dataStore.faculty.length + 1).toString().padStart(3, '0')}`;
-        const newFaculty: Faculty = {
-            id: newId,
-            name: facultyMember.name || 'Unnamed Faculty',
-            expertise: facultyMember.expertise || [],
-            availability: facultyMember.availability || { Monday: [], Tuesday: [], Wednesday: [], Thursday: [], Friday: [] },
-        };
-        dataStore.faculty.push(newFaculty);
-    },
-    addStudentGroup: (studentGroup) => {
-        const newId = `SG_${(dataStore.studentGroups.length + 1).toString()}`;
-        const newStudentGroup: StudentGroup = {
-            id: newId,
-            name: studentGroup.name || 'Unnamed Group',
-            size: studentGroup.size || 0,
-            courses: studentGroup.courses || [],
-        };
-        dataStore.studentGroups.push(newStudentGroup);
-    }
+// Define types based on your data structure.
+// It's a good practice to have these align with your Firestore documents.
+export type Faculty = {
+  id: string;
+  name: string;
+  expertise: string[];
+  availability: { [day: string]: string[] };
 };
 
+export type StudentGroup = {
+  id: string;
+  name: string;
+  size: number;
+  courses: string[];
+};
+
+export type Course = (typeof initialCourses)[0];
+export type Room = (typeof initialRooms)[0];
+
+
+// The dataStore object now contains functions that perform async CRUD operations.
+const dataStore = {
+  // Static data can still be served from JSON files if they don't change.
+  getCourses: (): Course[] => initialCourses,
+  getRooms: (): Room[] => initialRooms,
+  
+  // Fetches all faculty members from the 'faculty' collection in Firestore.
+  getFaculty: async (): Promise<Faculty[]> => {
+    const facultySnapshot = await firestoreDb.collection('faculty').get();
+    if (facultySnapshot.empty) {
+      console.warn('No faculty found in Firestore. Returning empty array.');
+      return [];
+    }
+    return facultySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Faculty));
+  },
+
+  // Fetches all student groups from the 'studentGroups' collection in Firestore.
+  getStudentGroups: async (): Promise<StudentGroup[]> => {
+    const groupsSnapshot = await firestoreDb.collection('studentGroups').get();
+     if (groupsSnapshot.empty) {
+      console.warn('No student groups found in Firestore. Returning empty array.');
+      return [];
+    }
+    return groupsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as StudentGroup));
+  },
+
+  // Adds a new faculty member to the 'faculty' collection.
+  addFaculty: async (facultyMember: Omit<Faculty, 'id'>): Promise<void> => {
+    // Firestore can auto-generate an ID, so we don't need to create one.
+    await firestoreDb.collection('faculty').add(facultyMember);
+  },
+
+  // Adds a new student group to the 'studentGroups' collection.
+  addStudentGroup: async (studentGroup: Omit<StudentGroup, 'id'>): Promise<void> => {
+     await firestoreDb.collection('studentGroups').add(studentGroup);
+  }
+};
+
+// useDataStore now provides access to your database functions.
 export const useDataStore = () => dataStore;

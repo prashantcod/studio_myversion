@@ -1,16 +1,25 @@
 
-import { initializeApp, getApps, getApp } from "firebase/app";
+import * as admin from 'firebase-admin';
 
-const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-};
+// This file is responsible for initializing the Firebase Admin SDK for backend use.
 
-// Initialize Firebase
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+// Prevent re-initialization in a hot-reloading environment (like Next.js dev server)
+if (!admin.apps.length) {
+  try {
+    const serviceAccount = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS!);
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+      // Add your databaseURL if you are using Realtime Database
+      // databaseURL: `https://your-project-id.firebaseio.com`
+    });
+     console.log('Firebase Admin SDK initialized successfully.');
+  } catch (error: any) {
+    console.error('Firebase Admin SDK initialization error:', error.stack);
+    // Throw an error to prevent the app from starting with a misconfigured Firebase connection.
+    throw new Error('Failed to initialize Firebase Admin SDK. Please check your GOOGLE_APPLICATION_CREDENTIALS environment variable.');
+  }
+}
 
-export default app;
+// Export the initialized admin instance, which provides access to all Firebase services
+export const firebaseAdmin = admin;
+export const firestoreDb = admin.firestore();
