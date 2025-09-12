@@ -33,6 +33,7 @@ import { FacultyDialog } from '@/components/faculty-dialog';
 import { GenerateTimetableDialog } from '@/components/generate-timetable-dialog';
 import { StudentDialog } from '@/components/student-dialog';
 import { CoursesDialog } from '@/components/courses-dialog';
+import { RoomsDialog } from '@/components/rooms-dialog';
 
 export default function AppLayout({children}: {children: React.ReactNode}) {
   return (
@@ -68,14 +69,7 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
               <CoursesDialog />
               <FacultyDialog />
               <StudentDialog />
-              <SidebarMenuItem>
-                <SidebarMenuButton href="/dashboard" asChild tooltip="Rooms">
-                  <Link href="/dashboard">
-                    <DoorOpen />
-                    Rooms & Labs
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              <RoomsDialog />
             </SidebarGroup>
 
             <SidebarGroup>
