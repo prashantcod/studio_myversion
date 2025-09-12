@@ -201,8 +201,13 @@ export const getConflictSuggestions = async (conflicts: string[], timetable: Sch
                     }
                 }
             }
-            const {summary} = await summarizeTimetableConflicts({conflicts: JSON.stringify(conflicts)});
-            resolve([summary]);
+            try {
+                const result = await summarizeTimetableConflicts({conflicts: JSON.stringify(conflicts)});
+                resolve([result.summary]);
+            } catch (e) {
+                console.error("Failed to get summary from AI", e);
+                resolve(["Could not generate an AI summary for the conflicts."]);
+            }
         }, 1000);
     });
 };
