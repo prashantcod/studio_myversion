@@ -35,19 +35,22 @@ export function EnrolledStudentsDialog({ children }: { children: React.ReactNode
   const allStudents = React.useMemo(() => {
     const students: StudentWithDetails[] = [];
     studentGroups.forEach(group => {
-      group.students?.forEach((student, index) => {
-        // Simple hashing function to generate somewhat unique-looking phone numbers
-        const phoneSeed = parseInt(student.rollNumber.replace(/\D/g, '').slice(-4)) + index;
-        const phoneNumber = `987-654-${(phoneSeed % 10000).toString().padStart(4, '0')}`;
+      // The `students` property can be undefined, so we need to check for it.
+      if (group.students) {
+        group.students.forEach((student, index) => {
+          // Simple hashing function to generate somewhat unique-looking phone numbers
+          const phoneSeed = parseInt(student.rollNumber.replace(/\D/g, '').slice(-4)) + index;
+          const phoneNumber = `987-654-${(phoneSeed % 10000).toString().padStart(4, '0')}`;
 
-        students.push({
-          ...student,
-          groupName: group.name,
-          courses: group.courses,
-          email: `${student.name.toLowerCase().replace(/\s/g, '.')}@university.edu`,
-          phone: phoneNumber,
+          students.push({
+            ...student,
+            groupName: group.name,
+            courses: group.courses,
+            email: `${student.name.toLowerCase().replace(/\s/g, '.').replace(/[^a-z.]/g, '')}@university.edu`,
+            phone: phoneNumber,
+          });
         });
-      });
+      }
     });
     return students;
   }, [studentGroups]);
