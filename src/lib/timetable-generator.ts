@@ -124,6 +124,7 @@ export const generateTimetable = async (): Promise<TimetableResult> => {
 export const getConflictSuggestions = async (result: TimetableResult): Promise<string[]> => {
   const suggestions: string[] = [];
   const { conflicts, timetable } = result;
+  const suggestedConflicts = new Set<string>();
 
   // Build a map of currently used slots for faster lookups
   const scheduleTracker: Record<string, boolean> = {};
@@ -137,6 +138,10 @@ export const getConflictSuggestions = async (result: TimetableResult): Promise<s
   }
 
   for (const conflict of conflicts) {
+    if (suggestedConflicts.has(conflict)) {
+        continue; // Already found a suggestion for this exact conflict
+    }
+
     const match = conflict.match(/Could not find any available slot for (.*) for group (.*)/);
     if (match) {
       const courseCode = match[1];
@@ -154,6 +159,7 @@ export const getConflictSuggestions = async (result: TimetableResult): Promise<s
       );
       if (!suitableRoom) continue;
 
+      let suggestionFound = false;
       // Strategy 1: Find a completely empty slot for everyone involved.
       for (const day of DAYS) {
         for (const timeSlot of TIME_SLOTS) {
@@ -163,17 +169,14 @@ export const getConflictSuggestions = async (result: TimetableResult): Promise<s
 
             if (!scheduleTracker[facultySlotKey] && !scheduleTracker[roomSlotKey] && !scheduleTracker[studentGroupSlotKey]) {
                 const suggestion = `Move the '${course.name}' for '${studentGroup.name}' to ${day} at ${timeSlot} in ${suitableRoom.id}.`;
-                if (!suggestions.includes(suggestion)) {
-                    suggestions.push(suggestion);
-                }
-                // Stop after finding one suggestion for this conflict to keep it simple
-                break;
+                suggestions.push(suggestion);
+                suggestedConflicts.add(conflict);
+                suggestionFound = true;
+                break; // Stop after finding one suggestion for this conflict
             }
         }
-        if (suggestions.length > 0 && !suggestions.some(s => s.includes(course.name))) { 
-            // continue searching if we found a suggestion for another conflict
-        } else if (suggestions.length > 0) {
-            break;
+        if (suggestionFound) {
+            break; // Move to the next conflict
         }
       }
     }
