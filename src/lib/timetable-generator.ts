@@ -1,7 +1,7 @@
 
 'use server';
 
-import { getCourses, getFaculty, getRooms, getStudentGroups } from './data-store';
+import { useDataStore } from './data-store';
 import { summarizeTimetableConflicts } from '@/ai/flows/summarize-timetable-conflicts';
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
@@ -23,21 +23,22 @@ export type TimetableResult = {
 
 // This function simulates a promise-based async operation, like a real API call would be.
 export const generateTimetable = async (): Promise<TimetableResult> => {
-  return new Promise(async resolve => {
+  return new Promise(resolve => {
     // We wrap the logic in a timeout to simulate network latency
-    setTimeout(async () => {
-      
-      const allCourses = await getCourses();
-      const allFaculty = await getFaculty();
-      const allRooms = await getRooms();
-      const allStudentGroups = await getStudentGroups();
+    setTimeout(() => {
+      const { 
+        courses: allCourses, 
+        faculty: allFaculty,
+        rooms: allRooms,
+        studentGroups: allStudentGroups
+      } = useDataStore();
 
       const timetable: ScheduleEntry[] = [];
       const conflicts: string[] = [];
       
       const scheduleTracker: Record<string, boolean> = {};
 
-      const allCoursesToSchedule = (await Promise.all(allStudentGroups)).flatMap(group => 
+      const allCoursesToSchedule = allStudentGroups.flatMap(group => 
         group.courses.map(courseCode => ({
           course: allCourses.find(c => c.code === courseCode),
           studentGroup: group
@@ -119,11 +120,12 @@ export const generateTimetable = async (): Promise<TimetableResult> => {
 export const getConflictSuggestions = async (conflicts: string[], timetable: ScheduleEntry[]): Promise<string[]> => {
     return new Promise(async resolve => {
         setTimeout(async () => {
-            
-            const allCourses = await getCourses();
-            const allFaculty = await getFaculty();
-            const allRooms = await getRooms();
-            const allStudentGroups = await getStudentGroups();
+            const { 
+                courses: allCourses, 
+                faculty: allFaculty,
+                rooms: allRooms,
+                studentGroups: allStudentGroups
+            } = useDataStore();
 
             const suggestions: string[] = [];
             const suggestedFor = new Set<string>();
@@ -173,7 +175,7 @@ export const getConflictSuggestions = async (conflicts: string[], timetable: Sch
                     
                     const suitableFaculty = allFaculty.find(f => f.expertise.includes(course.code));
                     const suitableRoom = allRooms.find(r =>
-                        (course.type === 'Practical' ? r.type === 'Lab' : r.type === 'Classroom') &&
+                        (course.type === 'Practical' ? r.type === 'Lab' : 'Classroom') &&
                         r.capacity >= studentGroup.size
                     );
 

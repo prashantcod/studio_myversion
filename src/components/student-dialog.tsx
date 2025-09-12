@@ -13,26 +13,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { GraduationCap, Users, ChevronLeft, BookOpen } from 'lucide-react';
 import { SidebarMenuButton, SidebarMenuItem } from './ui/sidebar';
-import { getStudentGroups, StudentGroup } from '@/lib/data-store';
+import { useDataStore } from '@/lib/data-store';
+import { StudentGroup } from '@/lib/data/students.json';
 import { Badge } from './ui/badge';
-import { Skeleton } from './ui/skeleton';
 
 export function StudentDialog() {
   const [selectedGroup, setSelectedGroup] = React.useState<StudentGroup | null>(null);
-  const [studentGroups, setStudentGroups] = React.useState<StudentGroup[]>([]);
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [isOpen, setIsOpen] = React.useState(false);
-
-
-  React.useEffect(() => {
-    if (isOpen) {
-        setIsLoading(true);
-        getStudentGroups().then(data => {
-            setStudentGroups(data);
-            setIsLoading(false);
-        });
-    }
-  }, [isOpen]);
+  const { studentGroups } = useDataStore();
 
   const handleGroupSelect = (group: StudentGroup) => {
     setSelectedGroup(group);
@@ -43,7 +30,6 @@ export function StudentDialog() {
   };
 
   const onOpenChange = (open: boolean) => {
-    setIsOpen(open);
      if(!open) {
         setSelectedGroup(null)
      }
@@ -71,7 +57,7 @@ export function StudentDialog() {
           ) : (
             <>
               <DialogTitle>Student Groups</DialogTitle>
-              <DialogDescription>Select a group to view its details. {isLoading ? '' : `${studentGroups.length} groups found.`}</DialogDescription>
+              <DialogDescription>Select a group to view its details. {studentGroups.length} groups found.</DialogDescription>
             </>
           )}
         </DialogHeader>
@@ -105,17 +91,7 @@ export function StudentDialog() {
             </Card>
           ) : (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {isLoading ? Array.from({length: 4}).map((_, i) => (
-                <Card key={i}>
-                    <CardContent className="flex items-center gap-4 p-4">
-                         <Skeleton className="flex size-10 items-center justify-center rounded-full bg-secondary text-secondary-foreground" />
-                        <div>
-                            <Skeleton className="h-4 w-32" />
-                            <Skeleton className="mt-2 h-3 w-20" />
-                        </div>
-                    </CardContent>
-                </Card>
-              )) : studentGroups.map(group => (
+              {studentGroups.map(group => (
                 <Card key={group.id} className="cursor-pointer hover:bg-muted/50" onClick={() => handleGroupSelect(group)}>
                   <CardContent className="flex items-center gap-4 p-4">
                     <div className="flex size-10 items-center justify-center rounded-full bg-secondary text-secondary-foreground">

@@ -15,9 +15,9 @@ import { Users, ChevronLeft, BookOpen, Clock } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { SidebarMenuButton, SidebarMenuItem } from './ui/sidebar';
 import { placeholderImages } from '@/lib/placeholder-images.json';
+import { useDataStore } from '@/lib/data-store';
+import { Faculty } from '@/lib/data/faculty.json';
 import { Badge } from './ui/badge';
-import { getFaculty, Faculty } from '@/lib/data-store';
-import { Skeleton } from './ui/skeleton';
 
 
 const getInitials = (name: string) => {
@@ -31,22 +31,8 @@ const getInitials = (name: string) => {
 
 export function FacultyDialog() {
   const [selectedFaculty, setSelectedFaculty] = React.useState<Faculty | null>(null);
+  const { faculty: facultyData } = useDataStore();
   const teacherAvatar = placeholderImages.find(img => img.id === 'user-avatar');
-  const [facultyData, setFacultyData] = React.useState<Faculty[]>([]);
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [isOpen, setIsOpen] = React.useState(false);
-
-
-  React.useEffect(() => {
-    if (isOpen) {
-      setIsLoading(true);
-      getFaculty().then(data => {
-        setFacultyData(data);
-        setIsLoading(false);
-      });
-    }
-  }, [isOpen]);
-  
 
   const handleFacultySelect = (faculty: Faculty) => {
     setSelectedFaculty(faculty);
@@ -57,7 +43,6 @@ export function FacultyDialog() {
   };
 
   const onOpenChange = (open: boolean) => {
-    setIsOpen(open);
     if (!open) {
         setSelectedFaculty(null);
     }
@@ -85,7 +70,7 @@ export function FacultyDialog() {
           ) : (
             <>
               <DialogTitle>Faculty Members</DialogTitle>
-              <DialogDescription>Select a faculty member to view their details. {isLoading ? '' : `${facultyData.length} members found.`}</DialogDescription>
+              <DialogDescription>Select a faculty member to view their details. {facultyData.length} members found.</DialogDescription>
             </>
           )}
         </DialogHeader>
@@ -130,17 +115,7 @@ export function FacultyDialog() {
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-              {isLoading ? Array.from({length: 6}).map((_, i) => (
-                <Card key={i}>
-                    <CardContent className="flex items-center gap-4 p-4">
-                        <Skeleton className="h-10 w-10 rounded-full" />
-                        <div>
-                            <Skeleton className="h-4 w-24" />
-                            <Skeleton className="mt-2 h-3 w-32" />
-                        </div>
-                    </CardContent>
-                </Card>
-              )) : facultyData.map(faculty => (
+              {facultyData.map(faculty => (
                 <Card key={faculty.id} className="cursor-pointer hover:bg-muted/50" onClick={() => handleFacultySelect(faculty)}>
                   <CardContent className="flex items-center gap-4 p-4">
                     <Avatar>

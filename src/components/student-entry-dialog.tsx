@@ -15,12 +15,13 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useDataStore } from '@/lib/data-store';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { addStudentGroupAction } from '@/app/actions/add-data';
 
 export function StudentEntryDialog() {
+  const dataStore = useDataStore();
   const router = useRouter();
   const [name, setName] = useState('');
   const [size, setSize] = useState('');
@@ -28,7 +29,7 @@ export function StudentEntryDialog() {
   const [isOpen, setIsOpen] = useState(false);
   const { toast } = useToast();
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (!name || !size || !courses) {
         toast({
             variant: 'destructive',
@@ -38,29 +39,21 @@ export function StudentEntryDialog() {
         return;
     }
 
-    const result = await addStudentGroupAction({
+    dataStore.addStudentGroup({
         name,
         size: parseInt(size, 10) || 0,
         courses: courses.split(',').map(c => c.trim()),
     });
 
-    if (result.success) {
-      toast({
-          title: 'Student Group Added',
-          description: `${name} has been added.`,
-      });
-      router.refresh();
-      setName('');
-      setSize('');
-      setCourses('');
-      setIsOpen(false);
-    } else {
-       toast({
-          variant: 'destructive',
-          title: 'Failed to Add Group',
-          description: result.message,
-      });
-    }
+    toast({
+        title: 'Student Group Added',
+        description: `${name} has been added.`,
+    });
+    router.refresh();
+    setName('');
+    setSize('');
+    setCourses('');
+    setIsOpen(false);
   }
 
    const onOpenChange = (open: boolean) => {

@@ -16,18 +16,19 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useState } from 'react';
+import { useDataStore } from '@/lib/data-store';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { addTeacherAction } from '@/app/actions/add-data';
 
 export function TeacherEntryDialog() {
+    const dataStore = useDataStore();
     const router = useRouter();
     const [name, setName] = useState('');
     const [expertise, setExpertise] = useState('');
     const [isOpen, setIsOpen] = useState(false);
     const { toast } = useToast();
 
-    const handleSubmit = async () => {
+    const handleSubmit = () => {
         if (!name || !expertise) {
             toast({
                 variant: 'destructive',
@@ -37,29 +38,21 @@ export function TeacherEntryDialog() {
             return;
         }
 
-        const result = await addTeacherAction({
+        dataStore.addFaculty({
             name,
             expertise: expertise.split(',').map(e => e.trim()),
             availability: { Monday: [], Tuesday: [], Wednesday: [], Thursday: [], Friday: [] }
         });
         
-        if (result.success) {
-            toast({
-                title: 'Teacher Added',
-                description: `${name} has been added to the faculty.`,
-            });
-    
-            router.refresh();
-            setName('');
-            setExpertise('');
-            setIsOpen(false);
-        } else {
-             toast({
-                variant: 'destructive',
-                title: 'Failed to Add Teacher',
-                description: result.message,
-            });
-        }
+        toast({
+            title: 'Teacher Added',
+            description: `${name} has been added to the faculty.`,
+        });
+
+        router.refresh();
+        setName('');
+        setExpertise('');
+        setIsOpen(false);
     }
 
     const onOpenChange = (open: boolean) => {

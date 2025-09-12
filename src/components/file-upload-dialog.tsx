@@ -15,14 +15,14 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { FileUp, ArrowRight, Loader2 } from 'lucide-react';
+import { FileUp, ArrowRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { uploadDataAction } from '@/app/actions/upload-data';
+import { useDataStore } from '@/lib/data-store';
 import { useRouter } from 'next/navigation';
 
 export function FileUploadDialog() {
   const [file, setFile] = React.useState<File | null>(null);
-  const [isUploading, setIsUploading] = React.useState(false);
+  const dataStore = useDataStore();
   const { toast } = useToast();
   const router = useRouter();
 
@@ -41,56 +41,55 @@ export function FileUploadDialog() {
     }
   };
 
-  const handleUpload = async () => {
+  const handleUpload = () => {
     if (!file) return;
 
-    setIsUploading(true);
-    
     const reader = new FileReader();
-    reader.onload = async (e) => {
-        const content = e.target?.result as string;
-        const result = await uploadDataAction(content);
+    reader.onload = (e) => {
+        const text = e.target?.result as string;
+        const lines = text.split('\n').filter(line => line.trim() !== '');
+        const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
         
-        setIsUploading(false);
+        let teachersAdded = 0;
+        let studentsAdded = 0;
 
-        if (result.success) {
-            toast({
-                title: 'Upload Successful',
-                description: result.message,
+        for (let i = 1; i < lines.length; i++) {
+            const values = lines[i].split(',');
+            const row: any = {};
+            headers.forEach((header, index) => {
+                row[header] = values[index].trim();
             });
-            setFile(null);
-            // Trigger a re-render of the current route to fetch new data
-            router.refresh(); 
-        } else {
-             toast({
-                variant: 'destructive',
-                title: 'Upload Failed',
-                description: result.message,
-            });
+
+            if (row.expertise) { // Heuristic: if it has expertise, it's a teacher
+                dataStore.addFaculty({
+                    name: row.name,
+                    expertise: row.expertise.split(';'),
+                    availability: { Monday: [], Tuesday: [], Wednesday: [], Thursday: [], Friday: [] } // Default availability
+                });
+                teachersAdded++;
+            } else if (row.size && row.courses) { // Heuristic: if it has size and courses, it's a student group
+                dataStore.addStudentGroup({
+                    name: row.name,
+                    size: parseInt(row.size, 10),
+                    courses: row.courses.split(';')
+                });
+                studentsAdded++;
+            }
         }
-    };
-
-    reader.onerror = () => {
-        setIsUploading(false);
+        
         toast({
-            variant: 'destructive',
-            title: 'File Read Error',
-            description: 'Could not read the selected file.',
+            title: 'Upload Successful',
+            description: `Added ${teachersAdded} teachers and ${studentsAdded} student groups.`,
         });
-    };
 
+        setFile(null); // Reset file input
+        router.refresh(); // Re-render to show new data
+    };
     reader.readAsText(file);
   };
 
-  const onOpenChange = (open: boolean) => {
-    if (!open) {
-      setFile(null);
-      setIsUploading(false);
-    }
-  };
-
   return (
-    <Dialog onOpenChange={onOpenChange}>
+    <Dialog>
       <DialogTrigger asChild>
         <Button variant="outline" className="justify-start">
           <FileUp className="mr-2" />
@@ -128,9 +127,9 @@ export function FileUploadDialog() {
             </DialogClose>
           )}
            {file && (
-            <Button onClick={handleUpload} disabled={isUploading}>
-              {isUploading && <Loader2 className="mr-2 animate-spin" />}
-              {isUploading ? 'Uploading...' : 'Confirm and Upload'}
+            <Button onClick={handleUpload}>
+              <ArrowRight className="mr-2" />
+              Confirm and Upload
             </Button>
           )}
         </DialogFooter>
