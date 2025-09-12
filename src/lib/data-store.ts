@@ -8,6 +8,10 @@ import { ScheduleEntry } from '@/app/api/timetable/route';
 export type Course = (typeof initialCourses)[0];
 export type Room = (typeof initialRooms)[0];
 
+export type LoggedInStudent = Student & {
+    groupName: string;
+};
+
 export type RecentGeneration = {
     id: string;
     date: string;
@@ -44,6 +48,7 @@ type DataStore = {
     notifications: Notification[];
     timetable: ScheduleEntry[];
     recentGenerations: RecentGeneration[];
+    loggedInStudent: LoggedInStudent | null;
     addFaculty: (faculty: Omit<Faculty, 'id'>) => void;
     addStudentGroup: (group: Omit<StudentGroup, 'id'>) => void;
     addStudentToGroup: (groupId: string, student: Student) => void;
@@ -53,6 +58,7 @@ type DataStore = {
     bookRoom: (booking: Omit<ScheduleEntry, 'isOnLeave'>) => void;
     setTimetable: (newTimetable: ScheduleEntry[]) => void;
     updateRecentGeneration: (id: string, updates: Partial<Omit<RecentGeneration, 'id' | 'date'>>) => void;
+    setLoggedInStudent: (student: LoggedInStudent | null) => void;
 };
 
 // In-memory data store
@@ -62,6 +68,7 @@ let dataStore: DataStore = {
     faculty: [...initialFaculty],
     studentGroups: [...initialStudentGroups],
     timetable: [],
+    loggedInStudent: null,
     recentGenerations: [
          {
             id: 'GEN-001',
@@ -251,7 +258,10 @@ let dataStore: DataStore = {
         if (generation) {
             Object.assign(generation, updates);
         }
-    }
+    },
+    setLoggedInStudent: (student) => {
+        dataStore.loggedInStudent = student;
+    },
 };
 
 export const useDataStore = () => dataStore;

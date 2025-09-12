@@ -24,21 +24,39 @@ import { placeholderImages } from '@/lib/placeholder-images.json';
 import { Badge } from '@/components/ui/badge';
 import { useDataStore } from '@/lib/data-store';
 import { TimetableView } from '@/components/timetable-view';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 
 export default function StudentDashboardPage() {
   const studentAvatar = placeholderImages.find(img => img.id === 'user-avatar');
-  const { studentGroups, timetable, courses } = useDataStore();
+  const { studentGroups, timetable, courses, loggedInStudent } = useDataStore();
+  const router = useRouter();
 
-  // For demonstration, we'll just pick the first student from the first group.
-  const myGroup = studentGroups[0];
-  const me = myGroup?.students?.[0];
+  useEffect(() => {
+    // If no student is logged in, redirect to login page
+    if (!loggedInStudent) {
+      router.replace('/student/login');
+    }
+  }, [loggedInStudent, router]);
+
+  // Find the group the logged-in student belongs to
+  const myGroup = studentGroups.find(group => group.name === loggedInStudent?.groupName);
   
   const myCourses = myGroup?.courses.map(courseCode => 
     courses.find(c => c.code === courseCode)
   ).filter(Boolean) || [];
 
-  const mySchedule = timetable.filter(entry => entry.studentGroup === myGroup.name);
+  const mySchedule = myGroup ? timetable.filter(entry => entry.studentGroup === myGroup.name) : [];
+  
+  // Display a loading/skeleton state if the user is not yet available
+  if (!loggedInStudent || !myGroup) {
+     return (
+      <div className="flex h-screen items-center justify-center">
+        <p>Loading student data...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-4 py-4 md:gap-8">
@@ -53,16 +71,16 @@ export default function StudentDashboardPage() {
                   data-ai-hint={studentAvatar.imageHint}
                 />
               )}
-              <AvatarFallback>{me?.name.substring(0,2) || 'S'}</AvatarFallback>
+              <AvatarFallback>{loggedInStudent?.name.substring(0,2) || 'S'}</AvatarFallback>
             </Avatar>
             <div>
-              <CardTitle className="text-2xl">{me?.name || 'Student'}</CardTitle>
+              <CardTitle className="text-2xl">{loggedInStudent?.name || 'Student'}</CardTitle>
               <CardDescription>{myGroup.name}</CardDescription>
             </div>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              Roll Number: {me?.rollNumber || 'N/A'}
+              Roll Number: {loggedInStudent?.rollNumber || 'N/A'}
             </p>
           </CardContent>
         </Card>

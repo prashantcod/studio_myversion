@@ -25,24 +25,52 @@ export default function StudentLoginPage() {
     const [registerPassword, setRegisterPassword] = useState('');
     const [registerRollNumber, setRegisterRollNumber] = useState('');
     const { toast } = useToast();
-    const { addStudentToGroup } = useDataStore();
+    const { addStudentToGroup, studentGroups, setLoggedInStudent } = useDataStore();
     const router = useRouter();
 
 
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
-        // Mock login - in a real app, you'd validate against a database
-        if (loginEmail && loginPassword) {
+        
+        if (!loginEmail || !loginPassword) {
+             toast({
+                variant: 'destructive',
+                title: "Login Failed",
+                description: "Please enter your email and password.",
+            });
+            return;
+        }
+
+        // In a real app, you'd have a proper user authentication system.
+        // Here, we'll find a student based on their name, which we can derive from the email for demo purposes.
+        const nameFromEmail = loginEmail.split('@')[0].replace('.', ' ').replace(/\b\w/g, l => l.toUpperCase());
+
+        let foundStudent = null;
+        let foundGroup = null;
+
+        for (const group of studentGroups) {
+            if (group.students) {
+                const student = group.students.find(s => s.name.toLowerCase() === nameFromEmail.toLowerCase());
+                if (student) {
+                    foundStudent = student;
+                    foundGroup = group;
+                    break;
+                }
+            }
+        }
+        
+        if (foundStudent && foundGroup) {
+            setLoggedInStudent({ ...foundStudent, groupName: foundGroup.name });
             toast({
                 title: "Login Successful",
-                description: "Redirecting to your dashboard...",
+                description: `Welcome back, ${foundStudent.name}! Redirecting...`,
             });
             router.push('/student/dashboard');
         } else {
             toast({
                 variant: 'destructive',
                 title: "Login Failed",
-                description: "Please enter your email and password.",
+                description: "No student found with that email. Please register first.",
             });
         }
     };
@@ -64,8 +92,12 @@ export default function StudentLoginPage() {
                 description: "You can now log in with your new account.",
             });
             
-            // For demo purposes, redirect to dashboard. In a real app you might want to auto-login.
-            router.push('/student/dashboard');
+            // For demo purposes, we don't auto-login. The user can now sign in.
+            // In a real app you might want to auto-login.
+            // Let's switch to the login tab.
+            const loginTabTrigger = document.querySelector('button[data-state="inactive"][value="login"]') as HTMLButtonElement | null;
+            loginTabTrigger?.click();
+
         } else {
              toast({
                 variant: 'destructive',
