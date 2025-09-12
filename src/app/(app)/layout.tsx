@@ -9,6 +9,7 @@ import {
   Wand2,
   DoorOpen,
   ClipboardEdit,
+  Calendar,
 } from 'lucide-react';
 
 import {
@@ -92,6 +93,14 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
             <SidebarGroup>
               <SidebarGroupLabel>Core</SidebarGroupLabel>
               <GenerateTimetableDialog />
+              <SidebarMenuItem>
+                <SidebarMenuButton href="/timetable" asChild tooltip="View Timetable">
+                  <Link href="/timetable">
+                    <Calendar />
+                    View Timetable
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarGroup>
           </SidebarMenu>
         </SidebarContent>
