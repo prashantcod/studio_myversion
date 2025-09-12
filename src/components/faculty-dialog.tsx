@@ -21,7 +21,8 @@ import { useDataStore } from '@/lib/data-store';
 type Faculty = ReturnType<typeof useDataStore>['faculty'][0];
 
 const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('');
+    if (!name) return '??';
+    return name.split(' ').map(n => n[0]).join('').toUpperCase();
 }
 
 export function FacultyDialog() {
@@ -90,7 +91,7 @@ export function FacultyDialog() {
                         <Clock className="size-5 text-muted-foreground" />
                         <span className="font-medium">Total Availability Slots</span>
                       </div>
-                      <Badge variant="secondary">{Object.values(selectedFaculty.availability).flat().length} slots</Badge>
+                      <Badge variant="secondary">{Object.values(selectedFaculty.availability || {}).flat().length} slots</Badge>
                     </div>
                      <div className="flex items-center justify-between">
                        <div className="flex items-center gap-2">
