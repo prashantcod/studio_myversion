@@ -4,7 +4,7 @@
     {
       "id": "F001",
       "name": "Dr. Alan Turing",
-      "expertise": ["CSE101", "CSE101L", "CSE201", "CSE201L"],
+      "expertise": ["CSE101", "CSE101L", "CSE201", "CSE201L", "CSE301"],
       "availability": {
         "Monday": ["09:00-10:00", "10:00-11:00", "11:00-12:00", "14:00-15:00"],
         "Tuesday": ["10:00-11:00", "11:00-12:00", "15:00-16:00"],
@@ -16,7 +16,7 @@
     {
       "id": "F002",
       "name": "Dr. Grace Hopper",
-      "expertise": ["CSE201", "CSE201L", "PHY101"],
+      "expertise": ["CSE201", "CSE201L", "PHY101", "ITC402"],
       "availability": {
         "Monday": ["11:00-12:00", "12:00-13:00"],
         "Tuesday": ["09:00-10:00", "10:00-11:00", "14:00-15:00"],
@@ -28,7 +28,7 @@
     {
       "id": "F003",
       "name": "Prof. Ada Lovelace",
-      "expertise": ["ECE101", "ECE101L", "CHEM101"],
+      "expertise": ["ECE101", "ECE101L", "CHEM101", "ECE205"],
       "availability": {
         "Monday": ["14:00-15:00", "15:00-16:00"],
         "Tuesday": ["11:00-12:00", "12:00-13:00"],
@@ -40,13 +40,37 @@
     {
       "id": "F004",
       "name": "Prof. John Dewey",
-      "expertise": ["BEDU301", "MECH210"],
+      "expertise": ["BEDU301", "MECH210", "BEDU402"],
       "availability": {
         "Monday": ["09:00-10:00", "10:00-11:00"],
         "Tuesday": ["14:00-15:00", "15:00-16:00"],
         "Wednesday": ["11:00-12:00", "12:00-13:00"],
         "Thursday": ["09:00-10:00", "10:00-11:00"],
         "Friday": ["14:00-15:00", "15:00-16:00"]
+      }
+    },
+     {
+      "id": "F005",
+      "name": "Dr. Marie Curie",
+      "expertise": ["PHY101", "CHEM101"],
+      "availability": {
+        "Monday": ["10:00-11:00", "11:00-12:00"],
+        "Tuesday": ["14:00-15:00", "15:00-16:00"],
+        "Wednesday": ["10:00-11:00"],
+        "Thursday": ["14:00-15:00"],
+        "Friday": ["10:00-11:00", "11:00-12:00"]
+      }
+    },
+    {
+      "id": "F006",
+      "name": "Prof. Richard Feynman",
+      "expertise": ["MATH101", "PHY101"],
+      "availability": {
+        "Monday": ["14:00-15:00", "15:00-16:00"],
+        "Tuesday": ["09:00-10:00"],
+        "Wednesday": ["14:00-15:00", "15:00-16:00"],
+        "Thursday": ["09:00-10:00"],
+        "Friday": ["14:00-15:00"]
       }
     }
   ]
