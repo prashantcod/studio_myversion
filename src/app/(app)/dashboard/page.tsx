@@ -32,6 +32,7 @@ import { AvailableRoomsCard } from '@/components/available-rooms-card';
 import { CoursesDialogCard } from '@/components/courses-dialog-card';
 import { FacultyDialogCard } from '@/components/faculty-dialog-card';
 import { EnrolledStudentsCard } from '@/components/enrolled-students-card';
+import { ViewGenerationDialog } from '@/components/view-generation-dialog';
 
 const chartData = [
   {name: 'CSE', conflicts: 12},
@@ -123,9 +124,9 @@ export default function DashboardPage() {
                     </TableCell>
                     <TableCell className="text-right">{gen.conflicts}</TableCell>
                     <TableCell className="text-right">
-                      <Button asChild variant="outline" size="sm">
-                        <Link href="/timetable">View</Link>
-                      </Button>
+                      <ViewGenerationDialog generationId={gen.id}>
+                         <Button variant="outline" size="sm">View</Button>
+                      </ViewGenerationDialog>
                     </TableCell>
                   </TableRow>
                 ))}
