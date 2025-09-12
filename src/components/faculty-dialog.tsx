@@ -72,7 +72,7 @@ export function FacultyDialog() {
                  <Card>
                   <CardHeader className="items-center text-center">
                     <Avatar className="size-24">
-                      {teacherAvatar && <AvatarImage src={`https://picsum.photos/seed/${selectedFaculty.initials}/128/128`} data-ai-hint="teacher profile photo" />}
+                      {teacherAvatar && <AvatarImage src={teacherAvatar.imageUrl} data-ai-hint="teacher profile photo" />}
                       <AvatarFallback className="text-3xl">{selectedFaculty.initials}</AvatarFallback>
                     </Avatar>
                     <CardTitle className="pt-2">{selectedFaculty.name}</CardTitle>
@@ -142,7 +142,7 @@ export function FacultyDialog() {
                 <Card key={faculty.id} className="cursor-pointer hover:bg-muted/50" onClick={() => handleFacultySelect(faculty)}>
                   <CardContent className="flex items-center gap-4 p-4">
                     <Avatar>
-                      {teacherAvatar && <AvatarImage src={`https://picsum.photos/seed/${faculty.initials}/40/40`} data-ai-hint="teacher profile photo" />}
+                      {teacherAvatar && <AvatarImage src={teacherAvatar.imageUrl} data-ai-hint="teacher profile photo" />}
                       <AvatarFallback>{faculty.initials}</AvatarFallback>
                     </Avatar>
                     <div>
