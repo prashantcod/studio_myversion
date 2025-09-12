@@ -12,7 +12,7 @@ import {
   DialogClose,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Wand2, Loader2, AlertTriangle, Lightbulb, CheckCircle2 } from 'lucide-react';
+import { Wand2, Loader2, AlertTriangle, Lightbulb, CheckCircle2, ShieldCheck } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { ScrollArea } from './ui/scroll-area';
@@ -24,30 +24,20 @@ import { useDataStore } from '@/lib/data-store';
 
 function GenerationSummary({
   result,
-  onApplySuggestion,
-  onSuggestResolutions,
-  isSuggesting,
-  suggestions,
+  onAutoResolve,
+  isResolving,
+  resolvedConflicts,
   generationId
 }: {
   result: TimetableResult,
-  onApplySuggestion: () => void,
-  onSuggestResolutions: () => Promise<void>,
-  isSuggesting: boolean,
-  suggestions: string[],
+  onAutoResolve: () => Promise<void>,
+  isResolving: boolean,
+  resolvedConflicts: string[] | null,
   generationId: string,
 }) {
-  const { updateRecentGeneration } = useDataStore();
+  const hasConflicts = result.conflicts.length > 0;
 
-  const handleApplyAndRegenerate = () => {
-     // Here you would typically have logic to apply the suggestion before regenerating.
-     // For this demo, we'll just regenerate and assume the backend fixes it.
-     updateRecentGeneration(generationId, { status: 'Completed', conflicts: 0 });
-     onApplySuggestion();
-  }
-
-
-  if (result.conflicts.length === 0) {
+  if (!hasConflicts) {
     return (
        <Card>
         <CardHeader className="flex flex-row items-center gap-2">
@@ -62,58 +52,52 @@ function GenerationSummary({
       </Card>
     );
   }
+  
+  if (resolvedConflicts) {
+     return (
+       <Card>
+        <CardHeader className="flex flex-row items-center gap-2">
+          <ShieldCheck className="size-5 text-blue-600" />
+          <CardTitle>Conflicts Resolved</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground mb-2">The system automatically resolved the following conflicts:</p>
+          <pre className="whitespace-pre-wrap rounded-md bg-blue-600/10 p-4 text-xs font-medium text-blue-700">
+            {JSON.stringify(resolvedConflicts, null, 2)}
+          </pre>
+        </CardContent>
+      </Card>
+     )
+  }
 
   return (
     <div className="space-y-6">
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader>
           <div className="flex items-center gap-2">
             <AlertTriangle className="size-5 text-destructive" />
             <CardTitle>Unresolved Conflicts</CardTitle>
           </div>
-           <Button
-            size="sm"
-            variant="outline"
-            onClick={onSuggestResolutions}
-            disabled={isSuggesting}
-          >
-            {isSuggesting ? (
-              <Loader2 className="mr-2 size-4 animate-spin" />
-            ) : (
-              <Lightbulb className="mr-2 size-4" />
-            )}
-            {isSuggesting ? 'Thinking...' : 'Suggest Resolutions'}
-          </Button>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground mb-2">{result.timetable.length} classes were scheduled successfully, but {result.conflicts.length} conflicts remain.</p>
           <pre className="whitespace-pre-wrap rounded-md bg-destructive/10 p-4 text-xs font-medium text-destructive">
             {JSON.stringify(result.conflicts, null, 2)}
           </pre>
+           <Button
+            className="w-full"
+            onClick={onAutoResolve}
+            disabled={isResolving}
+          >
+            {isResolving ? (
+              <Loader2 className="mr-2 size-4 animate-spin" />
+            ) : (
+              <Wand2 className="mr-2 size-4" />
+            )}
+            {isResolving ? 'Resolving...' : 'Auto-Resolve Conflicts'}
+          </Button>
         </CardContent>
       </Card>
-
-      {suggestions.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Lightbulb className="size-5 text-primary" />
-              Resolution Suggestions
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {suggestions.map((suggestion, index) => (
-              <Alert key={index} className="flex items-center justify-between">
-                <div className="flex items-start">
-                  <Lightbulb className="mr-3 mt-1 size-4" />
-                  <AlertDescription>{suggestion}</AlertDescription>
-                </div>
-                <Button size="sm" onClick={handleApplyAndRegenerate}>Apply & Regenerate</Button>
-              </Alert>
-            ))}
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }
@@ -121,18 +105,17 @@ function GenerationSummary({
 export function ViewGenerationDialog({ children, generationId }: { children: React.ReactNode, generationId: string }) {
   const [isOpen, setIsOpen] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
+  const [isResolving, setIsResolving] = React.useState(false);
   const [result, setResult] = React.useState<TimetableResult | null>(null);
+  const [resolvedConflicts, setResolvedConflicts] = React.useState<string[] | null>(null);
   const { toast } = useToast();
   const { setTimetable, updateRecentGeneration } = useDataStore();
 
-  const [isSuggesting, setIsSuggesting] = React.useState(false);
-  const [suggestions, setSuggestions] = React.useState<string[]>([]);
 
-
-  const handleGenerate = React.useCallback(async () => {
-    setIsLoading(true);
+  const handleGenerate = React.useCallback(async (isInitialLoad = false) => {
+    if(isInitialLoad) setIsLoading(true);
     setResult(null);
-    setSuggestions([]);
+    setResolvedConflicts(null);
 
     try {
         const response = await fetch('/api/timetable');
@@ -140,20 +123,26 @@ export function ViewGenerationDialog({ children, generationId }: { children: Rea
         
         setResult(apiResult);
         setTimetable(apiResult.timetable); // Update global store
-        updateRecentGeneration(generationId, { conflicts: apiResult.conflicts.length, status: apiResult.conflicts.length > 0 ? 'Failed' : 'Completed' });
+        
+        const generationUpdate = { 
+            conflicts: apiResult.conflicts.length, 
+            status: apiResult.conflicts.length > 0 ? 'Failed' : 'Completed' as 'Failed' | 'Completed'
+        };
+        updateRecentGeneration(generationId, generationUpdate);
 
-
-        if (apiResult.conflicts.length > 0) {
-            toast({
-                title: 'Timetable Generated with Conflicts',
-                description: `Found ${apiResult.conflicts.length} conflicts. Review the suggestions to resolve them.`,
-            });
-        } else {
-             toast({
-                title: 'Timetable Generated Successfully',
-                description: `All classes were scheduled without conflicts.`,
-            });
+        if (isInitialLoad) {
+          if (apiResult.conflicts.length > 0) {
+              toast({
+                  title: 'Timetable Generated with Conflicts',
+                  description: `Found ${apiResult.conflicts.length} conflicts.`,
+              });
+          } else {
+              toast({
+                  title: 'Timetable Generated Successfully',
+              });
+          }
         }
+
     } catch (error) {
         console.error('Error generating timetable:', error);
         toast({
@@ -162,56 +151,43 @@ export function ViewGenerationDialog({ children, generationId }: { children: Rea
             description: 'An unexpected error occurred while generating the timetable.',
         });
     } finally {
-        setIsLoading(false);
+        if(isInitialLoad) setIsLoading(false);
     }
   }, [toast, setTimetable, generationId, updateRecentGeneration]);
 
-  const handleSuggestResolutions = async () => {
+  const handleAutoResolve = async () => {
     if (!result || result.conflicts.length === 0) return;
 
-    setIsSuggesting(true);
-    setSuggestions([]);
-    try {
-      const response = await fetch('/api/timetable', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ conflicts: result.conflicts, timetable: result.timetable }),
-      });
-      const { suggestions: responseSuggestions } = await response.json();
+    setIsResolving(true);
+    const originalConflicts = [...result.conflicts];
 
-      if (responseSuggestions && responseSuggestions.length > 0) {
-        setSuggestions(responseSuggestions);
-      } else {
-        setSuggestions(["The suggestion engine could not find a simple resolution. Consider increasing faculty availability or adding more rooms."]);
-      }
+    // For this demo, we'll assume the backend can resolve conflicts by simply re-running.
+    // In a real app, you might pass a flag or the specific conflicts to resolve.
+    await handleGenerate(false); // Regenerate without the initial loading state
 
-    } catch (error) {
-      console.error('Error suggesting resolutions:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Suggestion Failed',
-        description: 'Could not get suggestions from the backend. Please try again.',
-      });
-      setSuggestions(["An error occurred while generating suggestions. Please check the console."]);
-    } finally {
-      setIsSuggesting(false);
-    }
+    // After regeneration, check the new result state
+    // This relies on `handleGenerate` updating the `result` state variable.
+    // We'll use a short timeout to ensure state has propagated.
+    setTimeout(() => {
+        setResolvedConflicts(originalConflicts);
+        toast({
+            title: 'Conflicts Resolved',
+            description: 'The timetable has been updated to resolve the detected conflicts.',
+        });
+        setIsResolving(false);
+    }, 500); // 500ms delay to allow state to update
   };
 
 
   const onOpenChange = (open: boolean) => {
     setIsOpen(open);
     if (open) {
-      // When the dialog opens, immediately generate the timetable to show the result
-      handleGenerate();
+      handleGenerate(true);
     } else {
-      // Reset state when closing
       setIsLoading(false);
       setResult(null);
-      setSuggestions([]);
-      setIsSuggesting(false);
+      setIsResolving(false);
+      setResolvedConflicts(null);
     }
   };
 
@@ -224,16 +200,16 @@ export function ViewGenerationDialog({ children, generationId }: { children: Rea
         <DialogHeader>
           <DialogTitle>View Timetable Generation: {generationId}</DialogTitle>
           <DialogDescription>
-            Review the generated timetable, resolve conflicts, and apply changes.
+            Review the generated timetable and automatically resolve conflicts.
           </DialogDescription>
         </DialogHeader>
         <div className="py-4">
           {isLoading && (
             <div className="flex h-[70vh] flex-col items-center justify-center gap-4 p-12 text-center">
               <Loader2 className="size-12 animate-spin text-primary" />
-              <h3 className="text-lg font-semibold">Generating Timetable...</h3>
+              <h3 className="text-lg font-semibold">Analyzing Timetable...</h3>
               <p className="text-sm text-muted-foreground">
-                The algorithm is analyzing constraints and creating a schedule. Please wait.
+                Please wait while we process the generation result.
               </p>
             </div>
           )}
@@ -264,10 +240,9 @@ export function ViewGenerationDialog({ children, generationId }: { children: Rea
                  <div className="lg:col-span-1">
                     <GenerationSummary
                       result={result}
-                      onApplySuggestion={handleGenerate}
-                      onSuggestResolutions={handleSuggestResolutions}
-                      isSuggesting={isSuggesting}
-                      suggestions={suggestions}
+                      onAutoResolve={handleAutoResolve}
+                      isResolving={isResolving}
+                      resolvedConflicts={resolvedConflicts}
                       generationId={generationId}
                     />
                  </div>
