@@ -8,13 +8,18 @@ function parseCSV(csvContent: string): Record<string, string>[] {
     const lines = csvContent.trim().split('\n');
     if (lines.length < 2) return [];
     
+    // Trim headers and convert to lowercase for consistent matching
     const header = lines[0].split(',').map(h => h.trim().toLowerCase());
+    
     const rows = lines.slice(1).map(line => {
-        // This regex handles quoted fields that may contain commas
+        // This regex handles comma-separated values, including those in quotes
         const values = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(v => v.trim().replace(/^"|"$/g, ''));
         const rowObject: Record<string, string> = {};
         header.forEach((key, index) => {
-            rowObject[key] = values[index];
+            // Ensure we don't try to access an index that doesn't exist
+            if (index < values.length) {
+                rowObject[key] = values[index];
+            }
         });
         return rowObject;
     });
@@ -40,13 +45,17 @@ export async function uploadDataAction(fileContent: string): Promise<{ success: 
                 return acc;
             }, {} as Record<string, string>);
 
-            // Heuristics to identify teacher vs. student group
+            // --- Robust Heuristics to identify teacher vs. student group ---
+            const hasName = 'name' in lowerCaseKeys && lowerCaseKeys.name;
+
+            // Teacher-specific keys
             const hasExpertise = 'expertise' in lowerCaseKeys || 'skills' in lowerCaseKeys;
             const hasAvailability = 'availability' in lowerCaseKeys;
-            const hasCourses = 'courses' in lowerCaseKeys || 'subjects' in lowerCaseKeys;
+            
+            // Student-specific keys
             const hasSize = 'size' in lowerCaseKeys || 'groupsize' in lowerCaseKeys;
-            const hasName = 'name' in lowerCaseKeys;
-
+            const hasCourses = 'courses' in lowerCaseKeys || 'subjects' in lowerCaseKeys;
+            
             if (!hasName) continue; // Skip rows without a name
 
             if (hasExpertise || hasAvailability) { // Likely a teacher
@@ -54,14 +63,15 @@ export async function uploadDataAction(fileContent: string): Promise<{ success: 
                 const availabilityValue = lowerCaseKeys.availability;
                 let availabilityObject = { Monday: [], Tuesday: [], Wednesday: [], Thursday: [], Friday: [] };
                 try {
+                    // Handle availability as a JSON string
                     if (availabilityValue) {
-                         const parsed = JSON.parse(availabilityValue);
+                         const parsed = JSON.parse(availabilityValue.replace(/'/g, '"')); // Allow single quotes
                          if (typeof parsed === 'object') {
                             availabilityObject = parsed;
                          }
                     }
                 } catch {
-                    // Ignore parsing errors for availability, use default
+                    // Ignore parsing errors, use default empty availability
                 }
                 
                 dataStore.addFaculty({
@@ -85,8 +95,8 @@ export async function uploadDataAction(fileContent: string): Promise<{ success: 
             return { success: false, message: 'No valid teacher or student data found. Check CSV headers (e.g., name, expertise, size, courses).' };
         }
 
-        // Revalidate the path to reflect the changes in the UI.
-        revalidatePath('/(app)/dashboard', 'layout');
+        // Revalidate the entire layout to ensure all components using the data store are updated.
+        revalidatePath('/(app)', 'layout');
 
         return { success: true, message: `Successfully added ${teachersAdded} teachers and ${studentsAdded} student groups.` };
 

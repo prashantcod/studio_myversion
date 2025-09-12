@@ -22,7 +22,11 @@ type Faculty = ReturnType<typeof useDataStore>['faculty'][0];
 
 const getInitials = (name: string) => {
     if (!name) return '??';
-    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+    const parts = name.split(' ');
+    if (parts.length > 1) {
+        return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
 }
 
 export function FacultyDialog() {
@@ -61,7 +65,7 @@ export function FacultyDialog() {
           ) : (
             <>
               <DialogTitle>Faculty Members</DialogTitle>
-              <DialogDescription>Select a faculty member to view their details.</DialogDescription>
+              <DialogDescription>Select a faculty member to view their details. {facultyData.length} members found.</DialogDescription>
             </>
           )}
         </DialogHeader>
