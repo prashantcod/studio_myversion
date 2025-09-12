@@ -23,6 +23,7 @@ export default function StudentLoginPage() {
     const [registerName, setRegisterName] = useState('');
     const [registerEmail, setRegisterEmail] = useState('');
     const [registerPassword, setRegisterPassword] = useState('');
+    const [registerRollNumber, setRegisterRollNumber] = useState('');
     const { toast } = useToast();
     const { addStudentToGroup } = useDataStore();
     const router = useRouter();
@@ -48,11 +49,11 @@ export default function StudentLoginPage() {
 
     const handleRegister = (e: React.FormEvent) => {
         e.preventDefault();
-        if (registerName && registerEmail && registerPassword) {
+        if (registerName && registerEmail && registerPassword && registerRollNumber) {
             
             const newStudent = {
                 name: registerName,
-                rollNumber: `CSE1Y${Math.floor(100 + Math.random() * 900)}`, // Generate a random roll number
+                rollNumber: registerRollNumber,
             };
 
             // Add student to the first group for demo purposes
@@ -119,6 +120,10 @@ export default function StudentLoginPage() {
                 <div className="space-y-2">
                   <Label htmlFor="register-name">Full Name</Label>
                   <Input id="register-name" placeholder="John Smith" value={registerName} onChange={e => setRegisterName(e.target.value)} required />
+                </div>
+                 <div className="space-y-2">
+                  <Label htmlFor="register-roll">Roll Number</Label>
+                  <Input id="register-roll" placeholder="e.g. CSE1Y021" value={registerRollNumber} onChange={e => setRegisterRollNumber(e.target.value)} required />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="register-email">Email</Label>
