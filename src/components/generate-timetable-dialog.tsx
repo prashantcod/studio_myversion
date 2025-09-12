@@ -117,32 +117,28 @@ export function GenerateTimetableDialog() {
   const [suggestions, setSuggestions] = React.useState<string[]>([]);
 
 
-  const handleGenerate = React.useCallback(() => {
+  const handleGenerate = React.useCallback(async () => {
     setIsLoading(true);
     setResult(null);
     setSuggestions([]);
     
-    // Using a timeout to simulate async operation, as the sync function can be too fast
-    setTimeout(() => {
-        try {
-            const response = generateTimetable();
-            setResult(response);
-            toast({
-                title: 'Timetable Generated',
-                description: `${response.timetable.length} classes scheduled with ${response.conflicts.length} conflicts.`,
-            });
-        } catch (error) {
-            console.error('Error generating timetable:', error);
-            toast({
-                variant: 'destructive',
-                title: 'Generation Failed',
-                description: 'An unexpected error occurred.',
-            });
-        } finally {
-            setIsLoading(false);
-        }
-    }, 500);
-
+    try {
+        const response = await generateTimetable();
+        setResult(response);
+        toast({
+            title: 'Timetable Generated',
+            description: `${response.timetable.length} classes scheduled with ${response.conflicts.length} conflicts.`,
+        });
+    } catch (error) {
+        console.error('Error generating timetable:', error);
+        toast({
+            variant: 'destructive',
+            title: 'Generation Failed',
+            description: 'An unexpected error occurred.',
+        });
+    } finally {
+        setIsLoading(false);
+    }
   }, [toast]);
 
   const handleSuggestResolutions = async () => {

@@ -17,21 +17,28 @@ import {
 } from '@/components/ui/sidebar';
 import { Bell, User, Calendar, MessageSquare, Check, X, ChevronLeft } from 'lucide-react';
 import { Button } from './ui/button';
-import { useDataStore, LeaveRequest, ScheduleEntry } from '@/lib/data-store';
+import { useDataStore, LeaveRequest } from '@/lib/data-store';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { format } from 'date-fns';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from 'recharts';
 import { useToast } from '@/hooks/use-toast';
-import { generateTimetable } from '@/lib/timetable-generator';
+import { generateTimetable, ScheduleEntry } from '@/lib/timetable-generator';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
 const LeaveRequestDetail = ({ request, onBack, onApprove }: { request: LeaveRequest; onBack: () => void; onApprove: (id: string) => void; }) => {
-    const { timetable } = generateTimetable(); // Using the synchronous mock
-    
-    const affectedClasses = timetable.filter(
-        entry => entry.facultyName === request.facultyName
-    );
+    const [affectedClasses, setAffectedClasses] = React.useState<ScheduleEntry[]>([]);
+
+    React.useEffect(() => {
+        const getAffectedClasses = async () => {
+            const { timetable } = await generateTimetable();
+            const filtered = timetable.filter(
+                entry => entry.facultyName === request.facultyName
+            );
+            setAffectedClasses(filtered);
+        };
+        getAffectedClasses();
+    }, [request.facultyName]);
 
     const classesByCourse = affectedClasses.reduce((acc, entry) => {
         if (!acc[entry.courseName]) {

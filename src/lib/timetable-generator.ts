@@ -1,4 +1,3 @@
-
 'use server';
 
 import { useDataStore } from './data-store';
@@ -24,7 +23,9 @@ export type TimetableResult = {
 };
 
 // This function simulates a promise-based async operation, like a real API call would be.
-export const generateTimetable = (): TimetableResult => {
+export const generateTimetable = async (): Promise<TimetableResult> => {
+    return new Promise(resolve => {
+        setTimeout(() => {
     const { 
       courses: allCourses, 
       faculty: allFaculty,
@@ -147,8 +148,9 @@ export const generateTimetable = (): TimetableResult => {
         conflicts.push(`Could not find any available slot for ${course.code} for group ${studentGroup.name}`);
       }
     }
-
-    return { timetable, conflicts };
+            resolve({ timetable, conflicts });
+        }, 0);
+    });
 };
 
 

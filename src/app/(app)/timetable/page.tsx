@@ -12,10 +12,9 @@ export default function TimetablePage() {
     const [schedule, setSchedule] = useState<ScheduleEntry[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
-    const fetchTimetable = () => {
+    const fetchTimetable = async () => {
         setIsLoading(true);
-        // We can call the sync function directly now
-        const result = generateTimetable();
+        const result = await generateTimetable();
         setSchedule(result.timetable);
         setIsLoading(false);
     }
