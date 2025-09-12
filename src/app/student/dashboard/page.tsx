@@ -116,7 +116,7 @@ export default function StudentDashboardPage() {
             </Avatar>
             <div>
               <CardTitle className="text-2xl">{loggedInStudent?.name || 'Student'}</CardTitle>
-              <CardDescription>{myGroup.name}</CardDescription>
+              <CardDescription>{myGroup.program} - {myGroup.name.split(' - ')[1]}</CardDescription>
             </div>
           </CardHeader>
           <CardContent>

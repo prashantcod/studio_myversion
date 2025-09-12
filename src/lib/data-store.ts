@@ -3,11 +3,13 @@
 import { courses as initialCourses } from './data/courses.json';
 import { rooms as initialRooms } from './data/rooms.json';
 import { faculty as initialFaculty, Faculty } from './data/faculty.json';
-import { studentGroups as initialStudentGroups, StudentGroup, Student } from './data/students.json';
+import { studentGroups as initialStudentGroups, StudentGroup as BaseStudentGroup, Student } from './data/students.json';
 import { ScheduleEntry } from '@/app/api/timetable/route';
 
 export type Course = (typeof initialCourses)[0] & { category?: string };
 export type Room = (typeof initialRooms)[0];
+export type StudentGroup = BaseStudentGroup & { program: string };
+
 
 export type LoggedInStudent = Student & {
     groupName: string;
@@ -74,7 +76,7 @@ let dataStore: DataStore = {
             // Add a mock email to existing students for login to work
             email: `${student.name.toLowerCase().replace(/\s/g, '.')}@university.edu`
         }))
-    })),
+    })) as StudentGroup[],
     timetable: [],
     loggedInStudent: null,
     recentGenerations: [

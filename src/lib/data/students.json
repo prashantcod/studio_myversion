@@ -4,6 +4,7 @@
     {
       "id": "CSE_YEAR_1",
       "name": "Computer Science - 1st Year",
+      "program": "B.Tech",
       "size": 55,
       "courses": ["CSE101", "CSE101L", "PHY101", "MATH101", "ENG101"],
       "students": [
@@ -67,6 +68,7 @@
     {
       "id": "CSE_YEAR_2",
       "name": "Computer Science - 2nd Year",
+      "program": "B.Tech",
       "size": 50,
       "courses": ["CSE201", "CSE201L", "ECE205"],
       "students": [
@@ -125,6 +127,7 @@
     {
       "id": "CSE_YEAR_3",
       "name": "Computer Science - 3rd Year",
+      "program": "B.Tech",
       "size": 45,
       "courses": ["CSE301", "ITC402"],
       "students": [
@@ -178,6 +181,7 @@
     {
       "id": "ECE_YEAR_1",
       "name": "Electronics - 1st Year",
+      "program": "B.Tech",
       "size": 50,
       "courses": ["ECE101", "ECE101L", "CHEM101", "MATH101"],
        "students": [
@@ -236,6 +240,7 @@
     {
       "id": "MECH_YEAR_2",
       "name": "Mechanical - 2nd Year",
+      "program": "B.Tech",
       "size": 65,
       "courses": ["MECH210", "PHY101"],
        "students": [
@@ -309,6 +314,7 @@
     {
       "id": "BED_YEAR_3",
       "name": "B.Ed - 3rd Year",
+      "program": "B.Ed",
       "size": 40,
       "courses": ["BEDU301", "BEDU402"],
        "students": [
@@ -357,6 +363,7 @@
     {
       "id": "IT_YEAR_4",
       "name": "Information Tech - 4th Year",
+      "program": "B.Tech",
       "size": 35,
       "courses": ["ITC402", "CSE301"],
        "students": [
@@ -400,6 +407,7 @@
     {
       "id": "FYUP_SEM_1",
       "name": "FYUP Semester 1",
+      "program": "FYUP",
       "size": 120,
       "courses": ["PHY101", "CHEM101", "MATH101", "ENG101"],
       "students": [
@@ -510,7 +518,7 @@
         { "rollNumber": "FYUP1S105", "name": "Student 105", "email": "student.105@university.edu" },
         { "rollNumber": "FYUP1S106", "name": "Student 106", "email": "student.106@university.edu" },
         { "rollNumber": "FYUP1S107", "name": "Student 107", "email": "student.107@university.edu" },
-        { "rollNumber": "FYUP1S108", "name": "Student 108", "email": "student.108@university.edu" },
+        { "rollNumber": "FYUP1S0108", "name": "Student 108", "email": "student.108@university.edu" },
         { "rollNumber": "FYUP1S109", "name": "Student 109", "email": "student.109@university.edu" },
         { "rollNumber": "FYUP1S110", "name": "Student 110", "email": "student.110@university.edu" },
         { "rollNumber": "FYUP1S111", "name": "Student 111", "email": "student.111@university.edu" },
