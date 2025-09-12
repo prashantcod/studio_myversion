@@ -11,9 +11,35 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
-import { ClipboardEdit, FileUp, Files, PenSquare, UserPlus, GraduationCap } from 'lucide-react';
+import { ClipboardEdit, FileUp, Files, PenSquare } from 'lucide-react';
 import { StudentEntryDialog } from './student-entry-dialog';
 import { TeacherEntryDialog } from './teacher-entry-dialog';
+import { FileUploadDialog } from './file-upload-dialog';
+
+function ManualEntryDialog() {
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="justify-start">
+          <PenSquare className="mr-2" />
+          Manual Entry
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Manual Entry</DialogTitle>
+          <DialogDescription>
+            Select the type of data you want to enter manually.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex flex-col gap-4 py-4">
+          <StudentEntryDialog />
+          <TeacherEntryDialog />
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 export function DataEntryDialog() {
   return (
@@ -34,34 +60,12 @@ export function DataEntryDialog() {
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-4 py-4">
-          <Button variant="outline" className="justify-start">
-            <FileUp className="mr-2" />
-            Upload a Single File
-          </Button>
-          <Button variant="outline" className="justify-start">
+          <FileUploadDialog />
+          <Button variant="outline" className="justify-start" disabled>
             <Files className="mr-2" />
-            Upload Multiple Files
+            Upload Multiple Files (Coming Soon)
           </Button>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="outline" className="justify-start">
-                <PenSquare className="mr-2" />
-                Manual Entry
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>Manual Entry</DialogTitle>
-                <DialogDescription>
-                  Select the type of data you want to enter manually.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="flex flex-col gap-4 py-4">
-                <StudentEntryDialog />
-                <TeacherEntryDialog />
-              </div>
-            </DialogContent>
-          </Dialog>
+          <ManualEntryDialog />
         </div>
       </DialogContent>
     </Dialog>
